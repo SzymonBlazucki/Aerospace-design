@@ -1,3 +1,7 @@
+
+#Torque stuff, change span to negative
+
+
 import math
 
 import reader
@@ -28,6 +32,7 @@ class Forces:
 
     def lift(self, x):
         L = self.Cl(x) * 0.5 * 1.225 * self.v ** 2 * self.cord(x)  # constant rho assumed, update later
+        #L = self.Cl(x) * 0 + self.cord(x) * 0 + 1 #To get a straight lift dist.
         #print(np.sum(L))
         return L
 
@@ -42,6 +47,8 @@ class Forces:
         self.shearFunction = interp(x, np.array(out))
         return np.array(out)
 
+
+
     def torque(self):
         pass
 
@@ -54,6 +61,7 @@ class Forces:
             out.append(shearDist)
         #self.shearFunction = interp(x, np.array(out))
         return np.array(out)
+
 
 testForces = Forces(testFirstTable, testSecondTable, 10, 25, 10)
 span = np.linspace(0, 25, 100)
@@ -68,3 +76,5 @@ plt.show()
 
 class Wing:
     pass
+
+

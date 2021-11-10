@@ -24,6 +24,7 @@ class Forces:
         self.lCd = interp(first['y-span'], first.ICd)
         self.b2 = bHalf
         self.angle = math.radians(10)
+        self.shearFunction = None
 
     def lift(self, x):
         L = self.Cl(x) * 0.5 * 1.225 * self.v ** 2 * self.cord(x)  # constant rho assumed, update later
@@ -38,23 +39,30 @@ class Forces:
         for y in x:
             shearDist, trash = quad(self.lift, y, self.b2)
             out.append(shearDist)
+        self.shearFunction = interp(x, np.array(out))
         return np.array(out)
 
     def torque(self):
         pass
 
-    def bendingMoment(self, axlForce, x):
-        # M, self.momentError = quad(axlForce(x), x, self.b2)
-        #return M
-        pass
+    def bendingMoment(self, x):
+        if self.shearFunction == None:
+            self.shearForce(x)
+        out = []
+        for y in x:
+            shearDist, trash = quad(self.shearFunction, y, self.b2)
+            out.append(shearDist)
+        #self.shearFunction = interp(x, np.array(out))
+        return np.array(out)
 
 testForces = Forces(testFirstTable, testSecondTable, 10, 25, 10)
 span = np.linspace(0, 25, 100)
 
 plt.plot(span, testForces.lift(span))
 plt.show()
-
 plt.plot(span, testForces.shearForce(span))
+plt.show()
+plt.plot(span, testForces.bendingMoment(span))
 plt.show()
 
 

@@ -2,6 +2,7 @@ import reader
 import scipy as sp
 import matplotlib.pyplot as plt
 from scipy import interpolate
+from scipy.integrate import quad
 import numpy as np
 
 
@@ -26,8 +27,10 @@ class Forces:
     def axialForcePlot(self):
         pass
     def shearForcePlot(self):
-        pass
-
+        def integrand(x):
+            return Forces.lift(x)
+        shearDist = quad(integrand)
+        return shearDist
     def torquePlot(self):
         pass
 

@@ -1,9 +1,8 @@
-
-#Torque stuff, change span to negative
+# Torque stuff, change span to negative
+# Shear and bending in the other direction (drag) ?
 
 
 import math
-
 import reader
 import scipy as sp
 import matplotlib.pyplot as plt
@@ -16,6 +15,12 @@ def interp(x, y):
     f = interpolate.interp1d(x, y, kind='cubic', fill_value='extrapolate')
     return f
 
+def plotter(x, y, xLabel, yLabel):
+        plt.plot(x, y)
+        plt.title(xLabel + ' vs ' + yLabel)
+        plt.xlabel(xLabel)
+        plt.ylabel(yLabel)
+        plt.show()
 
 testFirstTable, testSecondTable = reader.readXLFR('xlfrData/test.csv')
 
@@ -24,16 +29,16 @@ class Forces:
     def __init__(self, first, second, freeVel, bHalf, angle):
         self.v = freeVel
         self.Cl = interp(first['y-span'], first.Cl)
-        self.cord = interp(first['y-span'], first.Chord)
+        self.chord = interp(first['y-span'], first.Chord)
         self.lCd = interp(first['y-span'], first.ICd)
         self.b2 = bHalf
         self.angle = math.radians(10)
         self.shearFunction = None
 
     def lift(self, x):
-        L = self.Cl(x) * 0.5 * 1.225 * self.v ** 2 * self.cord(x)  # constant rho assumed, update later
-        #L = self.Cl(x) * 0 + self.cord(x) * 0 + 1 #To get a straight lift dist.
-        #print(np.sum(L))
+        L = self.Cl(x) * 0.5 * 1.225 * self.v ** 2 * self.chord(x)  # constant rho assumed, update later
+        # L = self.Cl(x) * 0 + self.cord(x) * 0 + 1 #To get a straight lift dist.
+        # print(np.sum(L))
         return L
 
     def axialForce(self):
@@ -47,8 +52,6 @@ class Forces:
         self.shearFunction = interp(x, np.array(out))
         return np.array(out)
 
-
-
     def torque(self):
         pass
 
@@ -59,22 +62,24 @@ class Forces:
         for y in x:
             shearDist, trash = quad(self.shearFunction, y, self.b2)
             out.append(shearDist)
-        #self.shearFunction = interp(x, np.array(out))
+        # self.shearFunction = interp(x, np.array(out))
         return np.array(out)
 
 
 testForces = Forces(testFirstTable, testSecondTable, 10, 25, 10)
 span = np.linspace(0, 25, 100)
 
-plt.plot(span, testForces.lift(span))
-plt.show()
-plt.plot(span, testForces.shearForce(span))
-plt.show()
-plt.plot(span, testForces.bendingMoment(span))
-plt.show()
+# plt.plot(span, testForces.lift(span))
+# plt.show()
+# plt.plot(span, testForces.shearForce(span))
+# plt.show()
+# plt.plot(span, testForces.bendingMoment(span))
+# plt.show()
+
+plotter(span, testForces.lift(span), 'Span [m]', 'Lift per span [N/m]')
+plotter(span, testForces.shearForce(span), 'Span [m]', 'Shear force [N]')
+plotter(span, testForces.bendingMoment(span), 'Span [m]', 'Bending moment [N*m]')
 
 
 class Wing:
     pass
-
-

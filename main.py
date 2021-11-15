@@ -46,10 +46,10 @@ class Forces:
         #print(np.sum(L))
         return L
 
-    def moment(self, x):
-        CmCentroid = self.Cm(x) + (self.xCentroid - 1/4) * self.Cl(x) # Cm at wb centroid
-        M = CmCentroid * self.dynamicPressure * self.chord(x) ** 2
-        return M
+    # def moment(self, x):
+    #     CmCentroid = self.Cm(x) + (self.xCentroid - 1/4) * self.Cl(x) # Cm at wb centroid
+    #     M = CmCentroid * self.dynamicPressure * self.chord(x) ** 2
+    #     return M
 
     def axialForce(self):
         pass
@@ -82,7 +82,7 @@ class Forces:
         def d(x): # Distance between wb centroid and xcp
             return (self.xCp(x) - self.xCentroid) * self.chord(x)
         def h(x): # Function of distance * shear
-            return interp(x, d(x) * self.shearFunction(x) - self.moment(x))
+            return interp(x, d(x) * self.shearFunction(x)) #- self.moment(x)) # Cm is  not included becaus it comes from Cl
         for y in x:
             torqueDist, trash = quad(h(x), y, self.b2)
             out.append(torqueDist)
@@ -101,7 +101,7 @@ span = np.linspace(0, 25, 101)
 # plt.show()
 # plt.plot(span, testForces.bendingMoment(span))
 # plt.show()
-
+#
 plotter(span, testForces.lift(span), 'Span [m]', 'Lift per span [N/m]')
 plotter(span, testForces.shearForce(span), 'Span [m]', 'Shear force [N]')
 plotter(span, testForces.bendingMoment(span), 'Span [m]', 'Bending moment [N*m]')
@@ -110,3 +110,10 @@ plotter(span, testForces.torque(span), 'Span [m]', 'Torque [N*m]')
 
 class Wing:
     pass
+
+class Engine:
+    def __init__(self):
+        xPos = 0
+        yPos = 0
+        zPos = 0
+        weight = 0

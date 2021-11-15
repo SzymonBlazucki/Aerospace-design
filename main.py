@@ -11,6 +11,7 @@ from scipy import interpolate, signal
 from scipy.integrate import quad
 import numpy as np
 
+g = 9.80665 #[m/s^2] gravity acceleration
 
 def interp(x, y):
     f = interpolate.interp1d(x, y, kind='cubic', fill_value='extrapolate')
@@ -111,9 +112,10 @@ plotter(span, testForces.torque(span), 'Span [m]', 'Torque [N*m]')
 class Wing:
     pass
 
-class Engine:
-    def __init__(self):
-        xPos = 0
-        yPos = 0
-        zPos = 0
-        weight = 0
+class Engine: # coordinates with respect to local chord
+    def __init__(self, Forces):
+        xPos = 9.18 # [m]
+        yPos = - (Forces.xCentroid * Forces.chord(xPos) - 0.3 - 0.6 * 4.77)
+        zPos = - 0.678 # [m]
+        weight = 6120 * g # [N]
+        thrust = 360430 # [N]

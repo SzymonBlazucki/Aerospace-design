@@ -108,21 +108,21 @@ span = np.linspace(0, 25, 101)
 # plt.show()
 # plt.plot(span, testForces.bendingMoment(span))
 # plt.show()
-#
-plotter(span, testForces.lift(span), 'Span [m]', 'Lift per span [N/m]')
-plotter(span, testForces.shearForce(span), 'Span [m]', 'Shear force [N]')
-plotter(span, testForces.bendingMoment(span), 'Span [m]', 'Bending moment [N*m]')
-plotter(span, testForces.torque(span), 'Span [m]', 'Torque [N*m]')
-#plotter(span, testForces.moment(span), 'Span [m]', 'Cm Moment [N*m]')
 
 class Wing:
     pass
 
 
 class Wingbox:
-    def momentIntertia(self):
-        pass
-    #whatever + sadkjask
+    def momentIntertiaX(self, x):
+        Ix = 1.18 * 10 ** (-5) * Forces.chord(x)
+        return Ix
+    def momentInertiaY(self, x):
+        Iy = 2.5 * 10 ** (-5) * Forces.chord(x)
+        return Iy
+
+
+
     def twistDistribution(self):
         pass
 
@@ -134,7 +134,15 @@ class Wingbox:
 class Engine: # coordinates with respect to local chord
     def __init__(self, Forces):
         xPos = 9.18 # [m]
-        yPos = - (Forces.xCentroid * Forces.chord(xPos) - 0.3 - 0.6 * 4.77)
+        yPos = - Forces.xCentroid * Forces.chord(xPos) - 0.3 - 0.6 * 4.77
         zPos = - 0.678 # [m]
         weight = 6120 * g # [N]
         thrust = 360430 # [N]
+
+plotter(span, testForces.lift(span), 'Span [m]', 'Lift per span [N/m]')
+plotter(span, testForces.shearForce(span), 'Span [m]', 'Shear force [N]')
+plotter(span, testForces.bendingMoment(span), 'Span [m]', 'Bending moment [N*m]')
+plotter(span, testForces.torque(span), 'Span [m]', 'Torque [N*m]')
+plotter(span, Wingbox.momentIntertiaX(span), 'Span [m]', 'Ix [m^4]')
+plotter(span, Wingbox.momentIntertiaY(span), 'Span [m]', 'Iy [m^4]')
+

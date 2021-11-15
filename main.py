@@ -114,6 +114,19 @@ class Wing:
 
 
 class Wingbox:
+    def momentIntertia(self):
+        pass
+    #whatever + sadkjask
+    def twistDistribution(self):
+        pass
+
+    def bendingMoment(self):
+        pass
+
+
+
+
+class Wingbox:
     def momentIntertiaX(self, x):
         Ix = 1.18 * 10 ** (-5) * Forces.chord(x)
         return Ix

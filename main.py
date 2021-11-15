@@ -25,7 +25,7 @@ def plotter(x, y, xLabel, yLabel):
         plt.ylabel(yLabel)
         plt.show()
 
-testFirstTable, testSecondTable = reader.readXLFR('xlfrData/test.csv')
+testFirstTable, testSecondTable = reader.readXLFR('xlfrData/alpha0.csv')
 
 
 class Forces:
@@ -113,17 +113,6 @@ class Wing:
     pass
 
 
-class Wingbox:
-    def momentIntertia(self):
-        pass
-    #whatever + sadkjask
-    def twistDistribution(self):
-        pass
-
-    def bendingMoment(self):
-        pass
-
-
 
 
 class Wingbox:
@@ -134,6 +123,9 @@ class Wingbox:
         Iy = 2.5 * 10 ** (-5) * Forces.chord(x)
         return Iy
 
+    def lineInteg(self, x):
+
+    def torsionalStiffness(self, x):
 
 
     def twistDistribution(self):

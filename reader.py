@@ -1,6 +1,5 @@
 import pandas as pd
-import numpy as np
-import scipy as sp
+
 
 def readXLFR(fileName):
     firstTable = pd.read_csv(fileName, skipinitialspace=True, encoding_errors='ignore', skiprows=20, nrows=38)

@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from scipy import interpolate, signal
 from scipy.integrate import quad
 import numpy as np
+from numpy import heaviside
 
 g = 9.80665 #[m/s^2] gravity acceleration
 
@@ -28,7 +29,7 @@ testFirstTable, testSecondTable = reader.readXLFR('xlfrData/test.csv')
 
 
 class Forces:
-    def __init__(self, first, second, freeVel, bHalf, angle, xCentroid):
+    def __init__(self, first, second, freeVel, bHalf, angle, xCentroid, engine):
         self.v = freeVel
         self.Cl = interp(first['y-span'], first.Cl)
         self.chord = interp(first['y-span'], first.Chord)
@@ -40,6 +41,7 @@ class Forces:
         self.shearFunction = None
         self.xCentroid = xCentroid # x location of wb centroid in chords
         self.dynamicPressure = 1/2 * 1.225 * self.v ** 2
+        self.shearForceIntervals = engine.xPos
 
     def lift(self, x):
         L = self.Cl(x) * self.dynamicPressure * self.chord(x)  # constant rho assumed, update later
@@ -58,12 +60,16 @@ class Forces:
     def shearForce(self, x):
         out = []
         for y in x:
-            shearDist, trash = quad(self.lift, y, self.b2)
+
+            shearDist, trash = quad(self.lift + heaviside(,1), y, self.b2)
             # if y < 15: # Including the engine
             #     shearDist -= 5000*9.81
             out.append(shearDist)
 
         self.shearFunction = interp(x, np.array(out))
+        tst = interpolate.UnivariateSpline(x, self.lift(x), s=0)
+        print(tst.integral(1,self.b2))
+        print(self.shearFunction(1))
         return np.array(out)
 
 

@@ -6,6 +6,7 @@
 # in the csv file, changed the name of the column from CmAirf@chord/4 to CmAirf coz python didnt like it
 
 import math, reader
+from string import punctuation
 import matplotlib.pyplot as plt
 from scipy import interpolate, signal
 from scipy.integrate import quad
@@ -42,6 +43,7 @@ class Forces:
         self.xCentroid = xCentroid # x location of wb centroid in chords
         self.dynamicPressure = 1/2 * 1.225 * self.v ** 2
         self.shearForceIntervals = engine.xPos
+        self.engWeight = engine.weight
 
     def lift(self, x):
         L = self.Cl(x) * self.dynamicPressure * self.chord(x)  # constant rho assumed, update later
@@ -57,19 +59,22 @@ class Forces:
     def axialForce(self):
         pass
 
+    def verticalForce(self, x):
+        return self.lift(x) - heaviside(-x + self.shearForceIntervals, 1) * self.engWeight
+
     def shearForce(self, x):
         out = []
         for y in x:
 
-            shearDist, trash = quad(self.lift + heaviside(,1), y, self.b2)
+            shearDist, trash = quad(self.verticalForce, y, self.b2)
             # if y < 15: # Including the engine
             #     shearDist -= 5000*9.81
             out.append(shearDist)
 
         self.shearFunction = interp(x, np.array(out))
         tst = interpolate.UnivariateSpline(x, self.lift(x), s=0)
-        print(tst.integral(1,self.b2))
-        print(self.shearFunction(1))
+        # print(tst.integral(1,self.b2))
+        # print(self.shearFunction(1))
         return np.array(out)
 
 
@@ -96,23 +101,8 @@ class Forces:
         return np.array(out)
 
 
-testForces = Forces(testFirstTable, testSecondTable,
-                    freeVel=10, bHalf=28, angle=10,
-                    xCentroid=0.3755)
-
-span = np.linspace(0, 25, 101)
-
-# plt.plot(span, testForces.lift(span))
-# plt.show()
-# plt.plot(span, testForces.shearForce(span))
-# plt.show()
-# plt.plot(span, testForces.bendingMoment(span))
-# plt.show()
-
 class Wing:
     pass
-
-
 
 
 class Wingbox:
@@ -124,9 +114,10 @@ class Wingbox:
         return Iy
 
     def lineInteg(self, x):
+        pass
 
     def torsionalStiffness(self, x):
-
+        pass
 
     def twistDistribution(self):
         pass
@@ -137,17 +128,25 @@ class Wingbox:
 
 
 class Engine: # coordinates with respect to local chord
-    def __init__(self, Forces):
-        xPos = 9.18 # [m]
-        yPos = - Forces.xCentroid * Forces.chord(xPos) - 0.3 - 0.6 * 4.77
-        zPos = - 0.678 # [m]
-        weight = 6120 * g # [N]
-        thrust = 360430 # [N]
+    xPos = 9.18 # [m]
+    zPos = - 0.678 # [m]
+    weight = 6120 * g # [N]
+    thrust = 360430 # [N]
+    def yPos(self, xCentroid, chord):
+        return -(xCentroid * chord - 0.3 - 0.6 * 4.77)
 
+
+eng = Engine()
+testForces = Forces(testFirstTable, testSecondTable,
+                    freeVel=300, bHalf=28, angle=10,
+                    xCentroid=0.3755, engine=eng)
+
+span = np.linspace(0, 25, 101)
+
+print(quad(testForces.lift,0,testForces.b2))
+plotter(span, testForces.verticalForce(span), 'Span [m]', 'Vertical force per span [N/m]')
 plotter(span, testForces.lift(span), 'Span [m]', 'Lift per span [N/m]')
 plotter(span, testForces.shearForce(span), 'Span [m]', 'Shear force [N]')
 plotter(span, testForces.bendingMoment(span), 'Span [m]', 'Bending moment [N*m]')
 plotter(span, testForces.torque(span), 'Span [m]', 'Torque [N*m]')
-plotter(span, Wingbox.momentIntertiaX(span), 'Span [m]', 'Ix [m^4]')
-plotter(span, Wingbox.momentIntertiaY(span), 'Span [m]', 'Iy [m^4]')
-
+#plotter(span, testForces.moment(span), 'Span [m]', 'Cm Moment [N*m]')

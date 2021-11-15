@@ -118,6 +118,19 @@ plotter(span, testForces.torque(span), 'Span [m]', 'Torque [N*m]')
 class Wing:
     pass
 
+
+class Wingbox:
+    def momentIntertia(self):
+        pass
+    #whatever
+    def twistDistribution(self):
+        pass
+
+    def bendingMoment(self):
+        pass
+
+
+
 class Engine: # coordinates with respect to local chord
     def __init__(self, Forces):
         xPos = 9.18 # [m]

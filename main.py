@@ -122,7 +122,7 @@ class Wing:
 class Wingbox:
     def momentIntertia(self):
         pass
-    #whatever
+    #whatever + sadkjask
     def twistDistribution(self):
         pass
 

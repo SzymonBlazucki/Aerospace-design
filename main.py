@@ -19,12 +19,13 @@ def interp(x, y):
     f = interpolate.interp1d(x, y, kind='cubic', fill_value='extrapolate')
     return f
 
-def plotter(x, y, xLabel, yLabel):
+def plotter(plot, x, y, xLabel, yLabel):
         plt.plot(x, y)
         plt.title(xLabel + ' vs ' + yLabel)
         plt.xlabel(xLabel)
         plt.ylabel(yLabel)
-        plt.show()
+        if plot:
+            plt.show()
 
 testFirstTable, testSecondTable = reader.readXLFR('xlfrData/alpha0.csv')
 
@@ -88,6 +89,8 @@ class Forces:
 
     def torque(self, x):
         out = []
+        if self.shearFunction == None:
+            self.shearForce(x)
         def d(x): # Distance between wb centroid and xcp
             return (self.xCp(x) - self.xCentroid) * self.chord(x)
         def h(x): # Function of distance * shear
@@ -104,10 +107,12 @@ class Wing:
 
 
 class Wingbox:
-    def __init__(self, thickness, forces, shearMod):
+    def __init__(self, thickness, forces, shearMod, youngsModulus):
         self.t = thickness
         self.Forces = forces
+        self.E = youngsModulus
         self.G = shearMod
+
     def momentIntertiaX(self, x):
         Ix = 1.18 * 10 ** (-5) * self.Forces.chord(x)
         return Ix
@@ -122,17 +127,30 @@ class Wingbox:
         J = (4 * (0.0295875 * self.Forces.chord(x) ** 2) ** 2) / (self.lineInteg(x) / self.t)
         return J
 
-    def twistDistribution(self, x):
+    def twistDisplacement(self, x):
         out = []
         def func(x):
             return self.Forces.torque(x)/(self.G * self.torsionalStiffness(x))
         for y in x:
             twist, trash = quad(interp(x, func(x)), 0, y)
             out.append(twist)
-        return func(x), np.array(out)
+        return np.array(out)  # you sure about this output?
 
-    def bendingMoment(self):
-        pass
+    def bendingDisplacement(self, x):
+        out = []
+
+        def funcTheta(x):
+            return -self.Forces.bendingFunction(x)/(self.E * self.momentInertiaY(x)) # check please nto sure if I want x or y
+        for y in x:
+            twist, trash = quad(interp(x, funcTheta(x)), 0, y)
+            out.append(twist)
+        thetaFun = interp(x, np.array(out))
+        out = []
+        for y in x:
+            twist, trash = quad(interp(x, thetaFun(x)), 0, y)
+            out.append(twist)
+        return np.array(out)
+
 
 
 
@@ -149,14 +167,16 @@ eng = Engine()
 testForces = Forces(testFirstTable, testSecondTable,
                     freeVel=300, bHalf=28, angle=10,
                     xCentroid=0.3755, engine=eng)
-wb = Wingbox(thickness=0.001, forces=testForces, shearMod=(26 * 10 ** 9))
+wb = Wingbox(thickness=0.001, forces=testForces, shearMod=(26 * 10 ** 9), youngsModulus=68.9 * 10**9)
 
 span = np.linspace(0, 25, 101)
 
 print(quad(testForces.lift, 0, testForces.b2))
-plotter(span, testForces.verticalForce(span), 'Span [m]', 'Vertical force per span [N/m]')
-plotter(span, testForces.lift(span), 'Span [m]', 'Lift per span [N/m]')
-plotter(span, testForces.shearForce(span), 'Span [m]', 'Shear force [N]')
-plotter(span, testForces.bendingMoment(span), 'Span [m]', 'Bending moment [N*m]')
-plotter(span, testForces.torque(span), 'Span [m]', 'Torque [N*m]')
-plotter(span, wb.torsionalStiffness(span), 'Span [m]', 'Torsional Stiffness [m^4]')
+plotter(False, span, testForces.verticalForce(span), 'Span [m]', 'Vertical force per span [N/m]')
+plotter(False, span, testForces.lift(span), 'Span [m]', 'Lift per span [N/m]')
+plotter(False, span, testForces.shearForce(span), 'Span [m]', 'Shear force [N]')
+plotter(False, span, testForces.bendingMoment(span), 'Span [m]', 'Bending moment [N*m]')
+plt.show()
+plotter(True, span, testForces.torque(span), 'Span [m]', 'Torque [N*m]')
+plotter(True, span, wb.torsionalStiffness(span), 'Span [m]', 'Torsional Stiffness [m^4]')
+plotter(True, span, wb.bendingDisplacement(span), 'Span [m]', 'horizontal displacement [m]')

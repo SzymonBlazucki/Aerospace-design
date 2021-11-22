@@ -114,10 +114,10 @@ class Wingbox:
         self.G = shearMod
 
     def momentIntertiaX(self, x):
-        Ix = 1.18 * 10 ** (-5) * self.Forces.chord(x)
+        Ix = 1.18 * 10 ** (-5) * self.Forces.chord(x) ** 4
         return Ix
     def momentInertiaY(self, x):
-        Iy = 2.5 * 10 ** (-5) * self.Forces.chord(x)
+        Iy = 2.5 * 10 ** (-5) * self.Forces.chord(x) ** 4
         return Iy
 
     def lineInteg(self, x):
@@ -167,7 +167,7 @@ eng = Engine()
 testForces = Forces(testFirstTable, testSecondTable,
                     freeVel=300, bHalf=28, angle=10,
                     xCentroid=0.3755, engine=eng)
-wb = Wingbox(thickness=0.001, forces=testForces, shearMod=(26 * 10 ** 9), youngsModulus=68.9 * 10**9)
+wb = Wingbox(thickness=0.001, forces=testForces, shearMod=(26 * 10 ** 9), youngsModulus=(68.9 * 10**9))
 
 span = np.linspace(0, 25, 101)
 

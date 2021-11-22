@@ -30,7 +30,7 @@ testFirstTable, testSecondTable = reader.readXLFR('xlfrData/alpha0.csv')
 
 
 class Forces:
-    def __init__(self, first, second, freeVel, bHalf, angle, xCentroid, engine, wingbox):
+    def __init__(self, first, second, freeVel, bHalf, angle, xCentroid, engine):
         self.v = freeVel
         self.Cl = interp(first['y-span'], first.Cl)
         self.chord = interp(first['y-span'], first.Chord)
@@ -42,7 +42,7 @@ class Forces:
         self.shearFunction = None
         self.xCentroid = xCentroid # x location of wb centroid in chords
         self.dynamicPressure = 1/2 * 1.225 * self.v ** 2
-        self.shearForceIntervals = engine.xPos
+        self.engPos = engine.xPos
         self.engWeight = engine.weight
 
     def lift(self, x):
@@ -51,16 +51,11 @@ class Forces:
         #print(np.sum(L))
         return L
 
-    # def moment(self, x):
-    #     CmCentroid = self.Cm(x) + (self.xCentroid - 1/4) * self.Cl(x) # Cm at wb centroid
-    #     M = CmCentroid * self.dynamicPressure * self.chord(x) ** 2
-    #     return M
-
     def axialForce(self):
         pass
 
     def verticalForce(self, x):
-        return self.lift(x) - heaviside(-x + self.shearForceIntervals, 1) * self.engWeight
+        return self.lift(x) - heaviside(-x + self.engPos, 1) * self.engWeight
 
     def shearForce(self, x):
         out = []
@@ -106,21 +101,22 @@ class Wing:
 
 
 class Wingbox:
-    def __init__(self, thickness):
+    def __init__(self, thickness, forces):
         self.t = thickness
+        self.Forces = forces
 
     def momentIntertiaX(self, x):
-        Ix = 1.18 * 10 ** (-5) * Forces.chord(x)
+        Ix = 1.18 * 10 ** (-5) * self.Forces.chord(x)
         return Ix
     def momentInertiaY(self, x):
-        Iy = 2.5 * 10 ** (-5) * Forces.chord(x)
+        Iy = 2.5 * 10 ** (-5) * self.Forces.chord(x)
         return Iy
 
     def lineInteg(self, x):
-        return 1.031604716 * Forces.chord(x)
+        return 1.031604716 * self.Forces.chord(x)
 
     def torsionalStiffness(self, x):
-        J = (4 * (0.0295875 * Forces.chord(x) ** 2) ** 2) / (self.lineInteg(x) / self.t)
+        J = (4 * (0.0295875 * self.Forces.chord(x) ** 2) ** 2) / (self.lineInteg(x) / self.t)
         return J
 
     def twistDistribution(self):
@@ -141,10 +137,10 @@ class Engine: # coordinates with respect to local chord
 
 
 eng = Engine()
-wb = Wingbox(thickness=0.001)
 testForces = Forces(testFirstTable, testSecondTable,
                     freeVel=300, bHalf=28, angle=10,
-                    xCentroid=0.3755, engine=eng, wingbox=wb)
+                    xCentroid=0.3755, engine=eng)
+wb = Wingbox(thickness=0.001, forces=testForces)
 
 span = np.linspace(0, 25, 101)
 

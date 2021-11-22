@@ -106,12 +106,39 @@ class Wing:
     pass
 
 
+class Stringer:
+    def __init__(self, areaStr, topStr, botStr):
+        self.area = areaStr # area of stringer
+
+        self.topStr = topStr # count of top stringers
+        self.botStr = botStr # count of bot stringers
+
+        self.topXLoc = np.linspace(0, 0.45, topStr)
+        self.botXLoc = np.linspace(0, 0.45, botStr)
+
+
+    def topYPos(self, x): # y-position of stringers in top
+        return 0.016222222222 * x + 0.0653
+    def botYPos(self, x): # y-position of stringers in bot
+        return 0.014222222222 * x
+
+
+
+    def xBar(self): # x-centroid of stringers from bot-left corner of wingbox
+        return (self.area * self.topXLoc + self.area * self.botXLoc) / (self.area * (self.topStr + self.botStr))
+
+
 class Wingbox:
     def __init__(self, thickness, forces, shearMod, youngsModulus):
         self.t = thickness
         self.Forces = forces
         self.E = youngsModulus
         self.G = shearMod
+ # Thickness of wingbox sides in clockwise direction starting from trailing edge
+
+
+
+
 
     def momentInertiaX(self, x):
         Ix = 1.18 * 10 ** (-5) * self.Forces.chord(x) ** 4
@@ -168,6 +195,8 @@ testForces = Forces(testFirstTable, testSecondTable,
                     freeVel=300, bHalf=28, angle=10,
                     xCentroid=0.3755, engine=eng)
 wb = Wingbox(thickness=0.001, forces=testForces, shearMod=(26 * 10 ** 9), youngsModulus=(68.9 * 10**9))
+stringer = Stringer(0.05, 5, 5)
+print(stringer.xBar())
 
 span = np.linspace(0, 25, 101)
 

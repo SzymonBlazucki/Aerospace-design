@@ -30,7 +30,7 @@ testFirstTable, testSecondTable = reader.readXLFR('xlfrData/alpha0.csv')
 
 
 class Forces:
-    def __init__(self, first, second, freeVel, bHalf, angle, xCentroid, engine):
+    def __init__(self, first, second, freeVel, bHalf, angle, xCentroid, engine, wingbox):
         self.v = freeVel
         self.Cl = interp(first['y-span'], first.Cl)
         self.chord = interp(first['y-span'], first.Chord)
@@ -106,6 +106,9 @@ class Wing:
 
 
 class Wingbox:
+    def __init__(self, thickness):
+        self.t = thickness
+
     def momentIntertiaX(self, x):
         Ix = 1.18 * 10 ** (-5) * Forces.chord(x)
         return Ix
@@ -114,10 +117,11 @@ class Wingbox:
         return Iy
 
     def lineInteg(self, x):
-        pass
+        return 1.031604716 * Forces.chord(x)
 
     def torsionalStiffness(self, x):
-        pass
+        J = (4 * (0.0295875 * Forces.chord(x) ** 2) ** 2) / (self.lineInteg(x) / self.t)
+        return J
 
     def twistDistribution(self):
         pass
@@ -133,20 +137,21 @@ class Engine: # coordinates with respect to local chord
     weight = 6120 * g # [N]
     thrust = 360430 # [N]
     def yPos(self, xCentroid, chord):
-        return -(xCentroid * chord - 0.3 - 0.6 * 4.77)
+        return (-xCentroid * chord - 0.3 - 0.6 * 4.77)
 
 
 eng = Engine()
+wb = Wingbox(thickness=0.001)
 testForces = Forces(testFirstTable, testSecondTable,
                     freeVel=300, bHalf=28, angle=10,
-                    xCentroid=0.3755, engine=eng)
+                    xCentroid=0.3755, engine=eng, wingbox=wb)
 
 span = np.linspace(0, 25, 101)
 
-print(quad(testForces.lift,0,testForces.b2))
+print(quad(testForces.lift, 0, testForces.b2))
 plotter(span, testForces.verticalForce(span), 'Span [m]', 'Vertical force per span [N/m]')
 plotter(span, testForces.lift(span), 'Span [m]', 'Lift per span [N/m]')
 plotter(span, testForces.shearForce(span), 'Span [m]', 'Shear force [N]')
 plotter(span, testForces.bendingMoment(span), 'Span [m]', 'Bending moment [N*m]')
 plotter(span, testForces.torque(span), 'Span [m]', 'Torque [N*m]')
-#plotter(span, testForces.moment(span), 'Span [m]', 'Cm Moment [N*m]')
+plotter(span, wb.torsionalStiffness(span), 'Span [m]', 'Torsional Stiffness [m^4]')

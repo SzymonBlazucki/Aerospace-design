@@ -113,7 +113,7 @@ class Wingbox:
         self.E = youngsModulus
         self.G = shearMod
 
-    def momentIntertiaX(self, x):
+    def momentInertiaX(self, x):
         Ix = 1.18 * 10 ** (-5) * self.Forces.chord(x) ** 4
         return Ix
     def momentInertiaY(self, x):
@@ -130,7 +130,7 @@ class Wingbox:
     def twistDisplacement(self, x):
         out = []
         def func(x):
-            return self.Forces.torque(x)/(self.G * self.torsionalStiffness(x))
+            return self.Forces.twistFunction(x)/(self.G * self.torsionalStiffness(x))
         for y in x:
             twist, trash = quad(interp(x, func(x)), 0, y)
             out.append(twist)
@@ -145,11 +145,11 @@ class Wingbox:
             twist, trash = quad(interp(x, funcTheta(x)), 0, y)
             out.append(twist)
         thetaFun = interp(x, np.array(out))
-        out = []
+        out1 = []
         for y in x:
             twist, trash = quad(interp(x, thetaFun(x)), 0, y)
-            out.append(twist)
-        return np.array(out)
+            out1.append(twist)
+        return [np.array(out)*360/2*math.pi, np.array(out1)]
 
 
 
@@ -179,4 +179,5 @@ plotter(False, span, testForces.bendingMoment(span), 'Span [m]', 'Bending moment
 plt.show()
 plotter(True, span, testForces.torque(span), 'Span [m]', 'Torque [N*m]')
 plotter(True, span, wb.torsionalStiffness(span), 'Span [m]', 'Torsional Stiffness [m^4]')
-plotter(True, span, wb.bendingDisplacement(span), 'Span [m]', 'horizontal displacement [m]')
+plotter(True, span, wb.twistDisplacement(span), 'Span [m]', 'horizontal displacement [m]')
+plotter(True, span, wb.bendingDisplacement(span)[1], 'Span [m]', 'horizontal displacement [m]')

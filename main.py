@@ -40,6 +40,8 @@ class Forces:
         self.b2 = bHalf
         self.angle = math.radians(10)
         self.shearFunction = None
+        self.bendingFunction = None
+        self.twistFunction = None
         self.xCentroid = xCentroid # x location of wb centroid in chords
         self.dynamicPressure = 1/2 * 1.225 * self.v ** 2
         self.engPos = engine.xPos
@@ -81,7 +83,7 @@ class Forces:
         for y in x:
             shearDist, trash = quad(self.shearFunction, y, self.b2)
             out.append(shearDist)
-        # self.shearFunction = interp(x, np.array(out))
+        self.bendingFunction = interp(x, np.array(out))
         return np.array(out)
 
     def torque(self, x):
@@ -93,6 +95,7 @@ class Forces:
         for y in x:
             torqueDist, trash = quad(h(x), y, self.b2)
             out.append(torqueDist)
+        self.twistFunction = interp(x, np.array(out))
         return np.array(out)
 
 

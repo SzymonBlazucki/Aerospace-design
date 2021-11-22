@@ -104,10 +104,10 @@ class Wing:
 
 
 class Wingbox:
-    def __init__(self, thickness, forces):
+    def __init__(self, thickness, forces, shearMod):
         self.t = thickness
         self.Forces = forces
-
+        self.G = shearMod
     def momentIntertiaX(self, x):
         Ix = 1.18 * 10 ** (-5) * self.Forces.chord(x)
         return Ix
@@ -122,8 +122,14 @@ class Wingbox:
         J = (4 * (0.0295875 * self.Forces.chord(x) ** 2) ** 2) / (self.lineInteg(x) / self.t)
         return J
 
-    def twistDistribution(self):
-        pass
+    def twistDistribution(self, x):
+        out = []
+        def func(x):
+            return self.Forces.torque(x)/(self.G * self.torsionalStiffness(x))
+        for y in x:
+            twist, trash = quad(interp(x, func(x)), 0, y)
+            out.append(twist)
+        return func(x), np.array(out)
 
     def bendingMoment(self):
         pass
@@ -143,7 +149,7 @@ eng = Engine()
 testForces = Forces(testFirstTable, testSecondTable,
                     freeVel=300, bHalf=28, angle=10,
                     xCentroid=0.3755, engine=eng)
-wb = Wingbox(thickness=0.001, forces=testForces)
+wb = Wingbox(thickness=0.001, forces=testForces, shearMod=(26 * 10 ** 9))
 
 span = np.linspace(0, 25, 101)
 
@@ -154,3 +160,5 @@ plotter(span, testForces.shearForce(span), 'Span [m]', 'Shear force [N]')
 plotter(span, testForces.bendingMoment(span), 'Span [m]', 'Bending moment [N*m]')
 plotter(span, testForces.torque(span), 'Span [m]', 'Torque [N*m]')
 plotter(span, wb.torsionalStiffness(span), 'Span [m]', 'Torsional Stiffness [m^4]')
+plotter(span, wb.twistDistribution(span)[1], 'Span [m]', 'Twist dist [deg]')
+plotter(span, wb.twistDistribution(span)[0], 'Span [m]', 'Function')

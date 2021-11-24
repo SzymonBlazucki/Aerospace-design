@@ -118,8 +118,9 @@ class Stringer:
     def __init__(self, areaStr, topStr, botStr):
         self.area = areaStr  # area of stringer
 
-        self.topStr = topStr  # count of top stringers
-        self.botStr = botStr  # count of bot stringers
+        self.totalStr = topStr + botStr
+        self.topStr = topStr # count of top stringers
+        self.botStr = botStr # count of bot stringers
 
         self.topXLoc = np.linspace(0, 0.45, topStr)
         self.botXLoc = np.linspace(0, 0.45, botStr)
@@ -133,26 +134,42 @@ class Stringer:
     def botYPos(self, x):  # y-position of stringers in bot
         return 0.014222222222 * x
 
-    def xBarStr(self):  # x-centroid of stringers from bot-left corner of wingbox which is 0.225
-        return (self.areaDot(self.topXLoc) + self.areaDot(self.botXLoc)) / (self.area * (self.topStr + self.botStr))
-
-    def yBarStr(self):
-        return (self.areaDot(self.topYPos(self.topXLoc)) + self.areaDot(self.botYPos(self.botXLoc))) / (
-                self.area * (self.topStr + self.botStr))
-
 
 class Wingbox:
-    def __init__(self, thickness, forces, shearMod, youngsModulus, sweep, Stringer):
+    def __init__(self, thickness, forces, shearMod, youngsModulus, sweep, stringer, t):
         self.t = thickness
         self.Forces = forces
         self.E = youngsModulus
         self.G = shearMod
         self.sweep = sweep
+        self.t1 = t[0]
+        self.t2 = t[1]
+        self.t3 = t[2]
+        self.t4 = t[3]
+        self.Stringer = stringer
+ # Thickness of wingbox sides in clockwise direction starting from trailing edge
 
-    # Thickness of wingbox sides in clockwise direction starting from trailing edge
+    def xBarWingbox(self, x):
+        return (0.6 *self.Forces.chord(x)*self.t1 * 0.0662 *self.Forces.chord(x)+\
+               0.225 *self.Forces.chord(x)*self.t2 * 0.45 *self.Forces.chord(x)+\
+               0.225 *self.Forces.chord(x)*self.t4 * 0.45 *self.Forces.chord(x)+\
+               self.Stringer.areaDot(self.Stringer.topXLoc) +\
+               self.Stringer.areaDot(self.Stringer.botXLoc))/(self.t1 * 0.0662 *self.Forces.chord(x)+\
+              self.t2 * 0.45 *self.Forces.chord(x)+self.t3 * 0.0653 *self.Forces.chord(x)+\
+              self.t4 * 0.45 *self.Forces.chord(x)+ self.Stringer.areaDot(self.Stringer.totalStr))
 
-    def xBarWb(self):
-        pass
+    def yBarWingbox(self, x):
+        return (0.002615 * self.t1 * self.Forces.chord(x) +\
+                0.0144 * self.t2 * self.Forces.chord(x) +\
+                0.002132 * self.t3 * self.Forces.chord(x) +\
+                0.03103 * self.t4 * self.Forces.chord(x) +\
+               self.Stringer.areaDot(self.Stringer.topYPos(self.Stringer.topXLoc)) +\
+               self.Stringer.areaDot(self.Stringer.botYPos(self.Stringer.botXLoc)))/(\
+               0.0662 * self.t1 * self.Forces.chord(x) +\
+               0.45 * self.t2 * self.Forces.chord(x) +\
+               0.0653 * self.t3 * self.Forces.chord(x) +\
+               0.45 * self.t4 * self.Forces.chord(x)+ \
+               self.Stringer.areaDot(self.Stringer.totalStr)) * self.Forces.chord(x)
 
     def momentInertiaX(self, x):
         Ix = 1.18 * 10 ** (-5) * self.Forces.chord(x) ** 4
@@ -210,14 +227,16 @@ class Engine:  # coordinates with respect to local chord
 
 
 eng = Engine()
-stringer = Stringer(0.0000006, 0, 2)
+strng = Stringer(0.0000006, 0, 2)
 testForces = Forces([zeroAngleFirstTable, tenAngleFirstTable],
                     freeVel=300, bHalf=28, angle=10,
                     AoA=math.asin((cld - zeroCl) / (tenCl - zeroCl) * math.sin(math.radians(10))), xCentroid=0.3755,
                     engine=eng, spanSteps=101)
 wb = Wingbox(thickness=0.001, forces=testForces, shearMod=(26 * 10 ** 9), youngsModulus=(68.9 * 10 ** 9),
-             Stringer=Stringer, sweep=27)
+             stringer=strng, sweep=27, t=[1, 1, 1, 1])
 
+print(wb.xBarWingbox(testForces.span))
+print(wb.yBarWingbox(testForces.span))
 plotter(testForces.span, testForces.bendingMoment, 'Span [m]', 'Torque [N*m]')
 # plotter(False, span, testForces.verticalForce(span), 'Span [m]', 'Vertical force per span [N/m]')
 # plotter(False, span, testForces.lift(span), 'Span [m]', 'Lift per span [N/m]')

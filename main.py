@@ -118,13 +118,17 @@ class Stringer:
     def __init__(self, areaStr, topStr, botStr):
         self.area = areaStr  # area of stringer
 
-        self.totalStr = topStr + botStr
-        self.topStr = topStr # count of top stringers
-        self.botStr = botStr # count of bot stringers
+        self.topLoc = topStr
+        self.botStr = botStr
+        self.topStr = len(topStr) + 2 # count of top stringers
+        self.botStr = len(botStr) + 2# count of bot stringers
+        self.totalStr = self.topStr + self.botStr
 
-        self.topXLoc = np.linspace(0, 0.45, topStr)
-        self.botXLoc = np.linspace(0, 0.45, botStr)
+        self.topXLoc = np.linspace(0, 0.45, self.topStr)
+        self.botXLoc = np.linspace(0, 0.45, self.botStr)
 
+    def numberStringers(self, loc, ySpan):
+        return 2 + np.count_nonzero(loc > ySpan, axis= 0) # not sure about axis
     def areaDot(self, x):  # dot product with area
         return np.dot((np.ones_like(x) * self.area), x)
 
@@ -227,14 +231,16 @@ class Engine:  # coordinates with respect to local chord
 
 
 eng = Engine()
-strng = Stringer(0.0000006, 0, 2)
+
+strng = Stringer(0.0000006, np.array([20, 16, 10, 8, 8]), np.array([17, 12, 8]))
+#print(strng.numberStringers(np.array([20, 16, 10, 8, 8]), np.linspace(5,10,10)))
+
 testForces = Forces([zeroAngleFirstTable, tenAngleFirstTable],
                     freeVel=300, bHalf=28, angle=10,
                     AoA=math.asin((cld - zeroCl) / (tenCl - zeroCl) * math.sin(math.radians(10))), xCentroid=0.3755,
                     engine=eng, spanSteps=101)
 wb = Wingbox(thickness=0.001, forces=testForces, shearMod=(26 * 10 ** 9), youngsModulus=(68.9 * 10 ** 9),
              stringer=strng, sweep=27, t=[1, 1, 1, 1])
-
 print(wb.xBarWingbox(testForces.span))
 print(wb.yBarWingbox(testForces.span))
 plotter(testForces.span, testForces.bendingMoment, 'Span [m]', 'Torque [N*m]')

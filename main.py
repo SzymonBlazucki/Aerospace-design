@@ -116,6 +116,8 @@ class Stringer:
         self.topXLoc = np.linspace(0, 0.45, topStr)
         self.botXLoc = np.linspace(0, 0.45, botStr)
 
+    def areaDot(self, x): # dot product with area
+        return np.dot((np.ones_like(x) * self.area), x)
 
     def topYPos(self, x): # y-position of stringers in top
         return 0.016222222222 * x + 0.0653
@@ -123,19 +125,25 @@ class Stringer:
         return 0.014222222222 * x
 
 
+    def xBarStr(self): # x-centroid of stringers from bot-left corner of wingbox which is 0.225
+        return (self.areaDot(self.topXLoc) + self.areaDot(self.botXLoc)) / (self.area * (self.topStr + self.botStr))
 
-    def xBar(self): # x-centroid of stringers from bot-left corner of wingbox
-        return (self.area * self.topXLoc + self.area * self.botXLoc) / (self.area * (self.topStr + self.botStr))
+    def yBarStr(self):
+        return (self.areaDot(self.topYPos(self.topXLoc)) + self.areaDot(self.botYPos(self.botXLoc))) / (self.area * (self.topStr + self.botStr))
+
+
+
 
 
 class Wingbox:
-    def __init__(self, thickness, forces, shearMod, youngsModulus):
+    def __init__(self, thickness, forces, shearMod, youngsModulus, Stringer):
         self.t = thickness
         self.Forces = forces
         self.E = youngsModulus
         self.G = shearMod
  # Thickness of wingbox sides in clockwise direction starting from trailing edge
 
+    def xBarWb(self):
 
 
 
@@ -191,16 +199,17 @@ class Engine: # coordinates with respect to local chord
 
 
 eng = Engine()
+stringer = Stringer(0.0000006, 0, 2)
 testForces = Forces(testFirstTable, testSecondTable,
                     freeVel=300, bHalf=28, angle=10,
                     xCentroid=0.3755, engine=eng)
-wb = Wingbox(thickness=0.001, forces=testForces, shearMod=(26 * 10 ** 9), youngsModulus=(68.9 * 10**9))
-stringer = Stringer(0.05, 5, 5)
-print(stringer.xBar())
+wb = Wingbox(thickness=0.001, forces=testForces, shearMod=(26 * 10 ** 9),
+             youngsModulus=(68.9 * 10**9), Stringer=Stringer)
 
+print(stringer.xBar())
+print(stringer.yBar())
 span = np.linspace(0, 25, 101)
 
-print(quad(testForces.lift, 0, testForces.b2))
 plotter(False, span, testForces.verticalForce(span), 'Span [m]', 'Vertical force per span [N/m]')
 plotter(False, span, testForces.lift(span), 'Span [m]', 'Lift per span [N/m]')
 plotter(False, span, testForces.shearForce(span), 'Span [m]', 'Shear force [N]')
@@ -208,5 +217,5 @@ plotter(False, span, testForces.bendingMoment(span), 'Span [m]', 'Bending moment
 plt.show()
 plotter(True, span, testForces.torque(span), 'Span [m]', 'Torque [N*m]')
 plotter(True, span, wb.torsionalStiffness(span), 'Span [m]', 'Torsional Stiffness [m^4]')
-plotter(True, span, wb.twistDisplacement(span), 'Span [m]', 'horizontal displacement [m]')
+plotter(True, span, wb.twistDisplacement(span), 'Span [m]', 'twist displacement [rad]')
 plotter(True, span, wb.bendingDisplacement(span)[1], 'Span [m]', 'horizontal displacement [m]')

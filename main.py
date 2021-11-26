@@ -17,7 +17,6 @@ from numpy import heaviside
 g = 9.80665  # [m/s^2] gravity acceleration
 cld = 0.6767
 
-
 def interp(x, y):
     f = interpolate.interp1d(x, y, kind='cubic', fill_value='extrapolate')
     return f
@@ -36,7 +35,7 @@ tenAngleFirstTable, tenAngleSecondTable, tenCl = reader.readXLFR('xlfrData/alpha
 
 
 class Forces:
-    def __init__(self, CLs, freeVel, bHalf, angle, xCentroid, engine, AoA, spanSteps):
+    def __init__(self, CLs, freeVel, bHalf, angle, xCentroid, engine, AoA, spanSteps, stringer, density):
         self.v = freeVel
         self.Cl = interp(CLs[0]['y-span'], CLs[0].Cl + (cld - zeroCl) / (tenCl - zeroCl) * (CLs[1].Cl - CLs[0].Cl))
         self.chord = interp(CLs[0]['y-span'], CLs[0].Chord)
@@ -46,6 +45,12 @@ class Forces:
                          CLs[0].CmAirf + (cld - zeroCl) / (tenCl - zeroCl) * (CLs[1].CmAirf - CLs[0].CmAirf))
         self.b2 = bHalf
         self.angle = math.radians(10)
+        self.density = density
+        self.Stringer = stringer
+        self.t1 = stringer.thickness[0]
+        self.t2 = stringer.thickness[1]
+        self.t3 = stringer.thickness[2]
+        self.t4 = stringer.thickness[3]
         self.shearFunction = None
         self.bendingFunction = None
         self.twistFunction = None
@@ -59,6 +64,11 @@ class Forces:
         self.bendingMoment(self.span)
         self.torque(self.span)
 
+
+    def weight(self, x):
+        Area = (self.chord(x) * (0.45*(self.t2+self.t4) + 0.063*self.t1 + 0.0653 * self.t3) + self.Stringer.areaTot(x))
+        return Area * self.density * g
+
     def lift(self, x):
         L = self.Cl(x) * self.dynamicPressure * self.chord(x)
         return L
@@ -68,8 +78,9 @@ class Forces:
         return D
 
     def verticalForce(self, x):
-        return self.lift(x) * math.cos(self.AoA) + self.drag(x) * math.sin(self.AoA) - heaviside(-x + self.engPos,
-                                                                                                 1) * self.engWeight
+        return self.lift(x) * math.cos(self.AoA) \
+               +self.drag(x) * math.sin(self.AoA) \
+               - heaviside(-x + self.engPos,1) * self.engWeight
 
     def shearForce(self, x):
         out = []
@@ -113,81 +124,122 @@ class Forces:
 class Wing:
     pass
 
-
 class Stringer:
-    def __init__(self, areaStr, topStr, botStr):
+    def __init__(self, areaStr, topStr, botStr, wbthickness):
         self.area = areaStr  # area of stringer
+        self.topStr = np.concatenate((np.array([28]), topStr, np.array([28]))) # add corner stringers
+        self.botStr = np.concatenate((np.array([28]), botStr, np.array([28])))
+        self.totalStr = np.concatenate((self.botStr, self.topStr))
+        self.thickness = wbthickness
+        self.topXPos = np.linspace(0.00000001, 0.45, len(self.topStr))
+        self.botXPos = np.linspace(0.00000001, 0.45, len(self.botStr))
 
-        self.topLoc = topStr
-        self.botStr = botStr
-        self.topStr = len(topStr) + 2 # count of top stringers
-        self.botStr = len(botStr) + 2# count of bot stringers
-        self.totalStr = self.topStr + self.botStr
 
-        self.topXLoc = np.linspace(0, 0.45, self.topStr)
-        self.botXLoc = np.linspace(0, 0.45, self.botStr)
 
-    def numberStringers(self, loc, ySpan):
-        return 2 + np.count_nonzero(loc > ySpan, axis= 0) # not sure about axis
-    def areaDot(self, x):  # dot product with area
-        return np.dot((np.ones_like(x) * self.area), x)
+    def numberStringers(self, ySpan):
+        out = np.array([])
+        for i in ySpan:
+            j = np.count_nonzero(self.totalStr >= i)
+            out = np.append(out, j)
+        return out
 
-    def topYPos(self, x):  # y-position of stringers in top
-        return 0.016222222222 * x + 0.0653
+    def activeStringers(self, loc, ySpan):
+        for i in ySpan:
+            j = loc * (loc >= i)
+            if i == 0:
+                out = j
+            else:
+                out = np.vstack([out, j])
+        return np.ones_like(out)
 
-    def botYPos(self, x):  # y-position of stringers in bot
-        return 0.014222222222 * x
+    def topYPos(self):  # y-position of stringers in top
+        return 0.016222222222 * self.topXPos + 0.0653
 
+    def botYPos(self):  # y-position of stringers in bot
+        return 0.014222222222 * self.botXPos
+
+    def areaTot(self, x):  # dot product with area
+        return self.numberStringers(x) * self.area
+
+    def areaX(self, x):
+        xActive = self.activeStringers(self.totalStr, x) * self.XPos() * self.area
+        return np.sum(xActive, axis=1)
+
+    def areaY(self, x):
+        yActive = self.activeStringers(self.totalStr, x) * self.YPos() * self.area
+        return np.sum(yActive, axis=1)
+
+    def XPos(self):
+        return np.concatenate((self.botXPos, self.topXPos))
+
+    def YPos(self):
+        return np.concatenate((self.botYPos(), self.topYPos()))
 
 class Wingbox:
-    def __init__(self, thickness, forces, shearMod, youngsModulus, sweep, stringer, t):
-        self.t = thickness
+    def __init__(self, forces, shearMod, youngsModulus, sweep, stringer):
         self.Forces = forces
         self.E = youngsModulus
         self.G = shearMod
         self.sweep = sweep
-        self.t1 = t[0]
-        self.t2 = t[1]
-        self.t3 = t[2]
-        self.t4 = t[3]
+        self.t = stringer.thickness
+        self.t1 = self.t[0]
+        self.t2 = self.t[1]
+        self.t3 = self.t[2]
+        self.t4 = self.t[3]
         self.Stringer = stringer
+
  # Thickness of wingbox sides in clockwise direction starting from trailing edge
 
     def xBarWingbox(self, x):
-        return (0.6 *self.Forces.chord(x)*self.t1 * 0.0662 *self.Forces.chord(x)+\
-               0.225 *self.Forces.chord(x)*self.t2 * 0.45 *self.Forces.chord(x)+\
-               0.225 *self.Forces.chord(x)*self.t4 * 0.45 *self.Forces.chord(x)+\
-               self.Stringer.areaDot(self.Stringer.topXLoc) +\
-               self.Stringer.areaDot(self.Stringer.botXLoc))/(self.t1 * 0.0662 *self.Forces.chord(x)+\
-              self.t2 * 0.45 *self.Forces.chord(x)+self.t3 * 0.0653 *self.Forces.chord(x)+\
-              self.t4 * 0.45 *self.Forces.chord(x)+ self.Stringer.areaDot(self.Stringer.totalStr))
+        xBar = (0.6 * self.Forces.chord(x) * self.t1 * 0.0662 + \
+                0.225 * self.Forces.chord(x) * self.t2 * 0.45 + \
+                0.225 * self.Forces.chord(x) * self.t4 * 0.45 + \
+                self.Stringer.areaX(x))/ \
+                (self.t1 * 0.0662 * self.Forces.chord(x) + self.t2 * 0.45 * self.Forces.chord(x) + \
+                 self.t3 * 0.0653 * self.Forces.chord(x) + self.t4 * 0.45 * self.Forces.chord(x) + \
+                 self.Stringer.areaTot(x))
+        return xBar
 
     def yBarWingbox(self, x):
-        return (0.002615 * self.t1 * self.Forces.chord(x) +\
-                0.0144 * self.t2 * self.Forces.chord(x) +\
-                0.002132 * self.t3 * self.Forces.chord(x) +\
-                0.03103 * self.t4 * self.Forces.chord(x) +\
-               self.Stringer.areaDot(self.Stringer.topYPos(self.Stringer.topXLoc)) +\
-               self.Stringer.areaDot(self.Stringer.botYPos(self.Stringer.botXLoc)))/(\
-               0.0662 * self.t1 * self.Forces.chord(x) +\
-               0.45 * self.t2 * self.Forces.chord(x) +\
-               0.0653 * self.t3 * self.Forces.chord(x) +\
-               0.45 * self.t4 * self.Forces.chord(x)+ \
-               self.Stringer.areaDot(self.Stringer.totalStr)) * self.Forces.chord(x)
+        yBar = (0.002615 * self.t1 * self.Forces.chord(x) + 0.0144 * self.t2 * self.Forces.chord(x) +\
+                0.002132 * self.t3 * self.Forces.chord(x) + 0.03103 * self.t4 * self.Forces.chord(x) +\
+               self.Stringer.areaY(x))/ \
+               (0.0662 * self.t1 * self.Forces.chord(x) + 0.45 * self.t2 * self.Forces.chord(x) + \
+               0.0653 * self.t3 * self.Forces.chord(x) + 0.45 * self.t4 * self.Forces.chord(x) + \
+               self.Stringer.areaTot(x))
+        return yBar
+
+    def steinerTerm(self, x):
+        def distance():
+            stringerY = self.Stringer.activeStringers(self.Stringer.totalStr, x) * self.Stringer.YPos()
+            rows, cols = stringerY.shape
+            # print(stringerY)
+            yCentroid = np.tile(np.array([self.yBarWingbox(x)]).transpose(), (1, cols))
+            # print(yCentroid)
+            length = (yCentroid - stringerY) ** 2
+            # print(length)
+            lengthCorrection = np.where(stringerY == 0, stringerY, length)
+            # print(lengthCorrection)
+            return np.sum(lengthCorrection, axis=1)
+        return distance() * self.Stringer.area * self.Forces.chord(x) ** 2
 
     def momentInertiaX(self, x):
-        Ix = 1.18 * 10 ** (-5) * self.Forces.chord(x) ** 4
+        Ix = (1/12 * self.t1 * 0.0662 ** 3 + self.t1 * 0.0662 * (0.0395 - self.yBarWingbox(x)) ** 2 +\
+             self.t2 * 0.45 * (0.032 - self.yBarWingbox(x)) ** 2 + 1/12 * self.t2 * 0.0653 ** 3 +\
+             self.t3 * 0.0653 * (0.03265 - self.yBarWingbox(x)) ** 2 +\
+             self.t4 * 0.045 * (0.06895 - self.yBarWingbox(x)) ** 2)\
+             * self.Forces.chord(x) ** 3 + self.steinerTerm(x)
         return Ix
 
-    def momentInertiaY(self, x):
-        Iy = 2.5 * 10 ** (-5) * self.Forces.chord(x) ** 4
-        return Iy
+    # def momentInertiaY(self, x):
+    #     Iy = 2.5 * 10 ** (-5) * self.Forces.chord(x) ** 4
+    #     return Iy
 
     def lineInteg(self, x):
-        return 1.031604716 * self.Forces.chord(x)
+        return ((0.0662 / self.t1) + (0.45 / self.t2) + (0.0653 / self.t3) + (0.45 / self.t4)) * self.Forces.chord(x)
 
     def torsionalStiffness(self, x):
-        J = (4 * (0.0295875 * self.Forces.chord(x) ** 2) ** 2) / (self.lineInteg(x) / self.t)
+        J = 4 * (0.0295875 * self.Forces.chord(x) ** 2) ** 2 / self.lineInteg(x)
         return J
 
     def twistDisplacement(self, x):
@@ -195,12 +247,12 @@ class Wingbox:
 
         def func(x):
             return (self.Forces.twistFunction(x) * math.cos(self.sweep) + self.Forces.bendingFunction(x) * math.sin(
-                self.sweep)) / (self.G * self.torsionalStiffness(x))
+               self.sweep)) / (self.G * self.torsionalStiffness(x))
 
         for y in x:
             twist, trash = quad(interp(x, func(x)), 0, y)
             out.append(twist)
-        return np.array(out)  # you sure about this output?
+        return np.array(out) * 180 / math.pi  # you sure about this output?
 
     def bendingDisplacement(self, x):
         out = []
@@ -214,10 +266,11 @@ class Wingbox:
             out.append(twist)
         thetaFun = interp(x, np.array(out))
         out1 = []
+
         for y in x:
             twist, trash = quad(interp(x, thetaFun(x)), 0, y)
             out1.append(twist)
-        return [np.array(out) * 360 / 2 * math.pi, np.array(out1)]
+        return np.array(out1) #np.array(out) * 360 / 2 * math.pi #
 
 
 class Engine:  # coordinates with respect to local chord
@@ -232,18 +285,65 @@ class Engine:  # coordinates with respect to local chord
 
 eng = Engine()
 
-strng = Stringer(0.0000006, np.array([20, 16, 10, 8, 8]), np.array([17, 12, 8]))
-#print(strng.numberStringers(np.array([20, 16, 10, 8, 8]), np.linspace(5,10,10)))
+strArea = float(input("Area of stringer in m2\n"))
+
+wbThickness = input("Thickness of wingbox sides in meters in this order: aft, bottom, front, top\nExample input: 0.03, 0.05, 0.01, 0.03\n")
+wbThickness = [float(x) for x in wbThickness.split(',')]
+
+topStringers = input("The length of top side stringers in meters from front to back. Corner stringers are included, so no need to include them. Half span is 28 meters.\nExample input: 18, 5, 1, 7, 25\n")
+if topStringers == '':
+    topStringers = []
+else:
+    topStringers = [float(x) for x in topStringers.split(',')]
+
+
+
+botStringers = input("The length of bot side stringers in meters from front to back. Corner stringers are included, so no need to include them. Half span is 28 meters.\nExample input: 18, 5, 1, 7, 25\n")
+if botStringers == '':
+    botStringers = []
+else:
+    botStringers = [float(x) for x in botStringers.split(',')]
+
+
+strng = Stringer(strArea, np.array(topStringers), np.array(botStringers), wbthickness=wbThickness)
+# print(strng.numberStringers(np.array([20, 16, 10, 8, 8]), np.linspace(5,10,10)))
+
+velocity = input("Do you want to change the velocity in m/s? To use default value, press enter.\nDefault value = 250 m/s which is Mach 0.84 at cruising altitude\n")
+if velocity == '':
+    velocity = 250
+else:
+    velocity = float(velocity)
+
+angle = input("Do you want to change the angle of attack in deg? To use default value, press enter.\nDefault value = 10 deg\n")
+if angle == '':
+    angle = 10
+else:
+    angle = float(angle)
 
 testForces = Forces([zeroAngleFirstTable, tenAngleFirstTable],
-                    freeVel=300, bHalf=28, angle=10,
-                    AoA=math.asin((cld - zeroCl) / (tenCl - zeroCl) * math.sin(math.radians(10))), xCentroid=0.3755,
-                    engine=eng, spanSteps=101)
-wb = Wingbox(thickness=0.001, forces=testForces, shearMod=(26 * 10 ** 9), youngsModulus=(68.9 * 10 ** 9),
-             stringer=strng, sweep=27, t=[1, 1, 1, 1])
-print(wb.xBarWingbox(testForces.span))
-print(wb.yBarWingbox(testForces.span))
-plotter(testForces.span, testForces.bendingMoment, 'Span [m]', 'Torque [N*m]')
+                    freeVel=velocity, bHalf=28, angle=angle,
+                    AoA=math.asin((cld - zeroCl) / (tenCl - zeroCl) * math.sin(math.radians(10))), xCentroid=0.3755, #might've changed
+                    engine=eng, spanSteps=101, stringer=strng, density=2700)
+wb = Wingbox(forces=testForces, shearMod=(26 * 10 ** 9), youngsModulus=(68.9 * 10 ** 9),
+             stringer=strng, sweep=27)
+
+
+plotter(testForces.span, testForces.lift, 'Span [m]', 'Lift per span [N/m]')
+# plotter(testForces.span, testForces.weight, 'Span [m]', 'Weight per span [N/m]')
+# plotter(testForces.span, testForces.drag, 'Span [m]', 'Drag per span [N/m]')
+# plotter(testForces.span, testForces.verticalForce, 'Span [m]', 'Vertical force per span [N]')
+plotter(testForces.span, testForces.shearForce, 'Span [m]', 'Shear Diagram [N]')
+
+plotter(testForces.span, wb.momentInertiaX, 'Span [m]', 'Moment of Inertia [m^4]')
+plotter(testForces.span, testForces.bendingMoment, 'Span [m]', 'Bending Moment [N*m]')
+plotter(testForces.span, wb.bendingDisplacement, 'Span [m]', 'Horizontal Displacement [m]')
+
+
+plotter(testForces.span, wb.torsionalStiffness, 'Span [m]', 'Torsional Stiffness [m^4]')
+plotter(testForces.span, testForces.torque, 'Span [m]', 'Torque [N*m]')
+plotter(testForces.span, wb.twistDisplacement, 'Span [m]', 'Twist Displacement [deg]')
+
+
 # plotter(False, span, testForces.verticalForce(span), 'Span [m]', 'Vertical force per span [N/m]')
 # plotter(False, span, testForces.lift(span), 'Span [m]', 'Lift per span [N/m]')
 # plotter(False, span, testForces.shearForce(span), 'Span [m]', 'Shear force [N]')

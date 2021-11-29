@@ -3,6 +3,7 @@ from scipy.integrate import quad
 from numpy import heaviside
 import math
 from constants import g, cld, zeroCl, tenCl, interp
+import time
 
 
 class Forces:
@@ -31,7 +32,10 @@ class Forces:
         self.engWeight = engine.weight
         self.AoA = AoA  # already in radians
         self.span = np.linspace(0, bHalf, spanSteps)
+        start = time.time()
         self.weightFunction = interp(self.span, self.weight(self.span))
+        print('weight time')
+        print(start - time.time())
         self.shearForce(self.span)
         self.bendingMoment(self.span)
         self.torque(self.span)
@@ -49,8 +53,6 @@ class Forces:
         D = self.lCd(x) * self.dynamicPressure * self.chord(x)
         return D
 
-    # def weightForForces(self, x):
-
     def verticalForce(self, x):
         return self.lift(x) * math.cos(self.AoA) \
                + self.drag(x) * math.sin(self.AoA) \
@@ -58,12 +60,16 @@ class Forces:
                - self.weightFunction(x)  # uggly hotfix
 
     def shearForce(self, x):
+        start = time.time()
         out = []
         for y in x:
             shearDist, trash = quad(self.verticalForce, y, self.b2)
             out.append(shearDist)
-
+        print(start - time.time())
+        start = time.time()
         self.shearFunction = interp(x, np.array(out))
+        print('Interp time')
+        print(start - time.time())
         return np.array(out)
 
     def bendingMoment(self, x):  # add moment

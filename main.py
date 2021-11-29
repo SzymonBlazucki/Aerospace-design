@@ -5,7 +5,7 @@
 # Using Nx, Ny, Nz from xflr file may have been easier, because we won't have to deal with angles or anything else
 # in the csv file, changed the name of the column from CmAirf@chord/4 to CmAirf coz python didnt like it
 
-import math, reader
+import math
 from forces import Forces
 from wingbox import Wingbox
 from supplementaryClasses import Stringer, Engine

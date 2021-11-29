@@ -3,7 +3,6 @@ from scipy.integrate import quad
 from numpy import heaviside
 import math
 from constants import g, cld, zeroCl, tenCl, interp
-import time
 
 
 class Forces:
@@ -32,10 +31,7 @@ class Forces:
         self.engWeight = engine.weight
         self.AoA = AoA  # already in radians
         self.span = np.linspace(0, bHalf, spanSteps)
-        start = time.time()
         self.weightFunction = interp(self.span, self.weight(self.span))
-        print('weight time')
-        print(start - time.time())
         self.verticalForceFunction = interp(self.span, self.verticalForce(self.span))
         self.shearForce(self.span)
         self.bendingMoment(self.span)
@@ -58,45 +54,27 @@ class Forces:
         return self.lift(x) * math.cos(self.AoA) \
                + self.drag(x) * math.sin(self.AoA) \
                - heaviside(-x + self.engPos, 1) * self.engWeight \
-               - self.weightFunction(x)  # uggly hotfix
+               - self.weightFunction(x)
 
     def shearForce(self, x):
-        start = time.time()
         out = np.array(list(map(lambda i: quad(self.verticalForceFunction, i, self.b2)[0], x)))
-        # for y in x:
-        #     shearDist, trash = quad(self.verticalForce, y, self.b2)
-        #     out.append(shearDist)
-        print(start - time.time())
-        start = time.time()
         self.shearFunction = interp(x, out)
-        print('Interp time')
-        print(start - time.time())
         return out
 
     def bendingMoment(self, x):  # add moment
-        out = []
-        for y in x:
-            shearDist, trash = quad(self.shearFunction, y, self.b2)
-            out.append(shearDist)
-        self.bendingFunction = interp(x, np.array(out))
-        return np.array(out)
+        out = np.array(list(map(lambda i: quad(self.shearFunction, i, self.b2)[0], x)))
+        self.bendingFunction = interp(x, out)
+        return out
 
     def torque(self, x):
-        out = []
-
+        # out = []
         def d(x):  # Distance between wb centroid and xcp
             return (self.xCp(x) - self.xCentroid) * self.chord(x)
-
-        def h(x):  # Function of distance * shear
-            return interp(x, d(x) * self.shearFunction(
-                x))  # - self.moment(x)) # Cm is  not included becaus it comes from Cl
-
-        for y in x:
-            torqueDist, trash = quad(h(x), y, self.b2)
-            out.append(torqueDist)
-        self.twistFunction = interp(x, np.array(out))
-        return np.array(out)
-
-    def BendingStressWOylocation(self,x):
-        # Divide moment by inertia
-        return self.bendingMoment(x) /
+        h = interp(x, d(x) * self.shearFunction(x))  # Function of distance * shear
+        #
+        # for y in x:
+        #     torqueDist, trash = quad(h(x), y, self.b2)
+        #     out.append(torqueDist)
+        out = np.array(list(map(lambda i: quad(h, i, self.b2)[0], x)))
+        self.twistFunction = interp(x, out)
+        return out

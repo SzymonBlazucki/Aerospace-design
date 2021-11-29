@@ -14,7 +14,9 @@ import numpy as np
 from constants import cld, zeroCl, tenCl, zeroAngleFirstTable, tenAngleFirstTable
 import time
 
+zeroTIme = time.time()
 start = time.time()
+
 
 def plotter(x, y, xLabel, yLabel):
     plt.plot(x, y(x))
@@ -76,7 +78,7 @@ testForces = Forces([zeroAngleFirstTable, tenAngleFirstTable],
                     freeVel=velocity, bHalf=28,
                     AoA=math.asin((cld - zeroCl) / (tenCl - zeroCl) * math.sin(math.radians(10))), xCentroid=0.3755,
                     # might've changed
-                    engine=eng, spanSteps=101, stringer=strng, density=2700)
+                    engine=eng, spanSteps=51, stringer=strng, density=2700)
 end = time.time()
 print(end - start)
 start = time.time()
@@ -87,7 +89,8 @@ print(end - start)
 start = time.time()
 
 plotter(testForces.span, testForces.verticalForce, 'Span [m]', 'Vertical force per span [N/m]')
-plotter(testForces.span, testForces.verticalForceFunction, 'Span [m]', 'Vertical force per span [N/m] - from interpolation')
+plotter(testForces.span, testForces.verticalForceFunction, 'Span [m]',
+        'Vertical force per span [N/m] - from interpolation')
 end = time.time()
 print(end - start)
 start = time.time()
@@ -96,12 +99,13 @@ plotter(testForces.span, testForces.drag, 'Span [m]', 'Drag per span [N/m]')
 plotter(testForces.span, testForces.shearFunction, 'Span [m]', 'Shear Diagram [N]')
 #
 plotter(testForces.span, wb.momentInertiaX, 'Span [m]', 'Moment of Inertia [m^4]')
-plotter(testForces.span, testForces.bendingMoment, 'Span [m]', 'Bending Moment [N*m]')
+plotter(testForces.span, testForces.bendingFunction, 'Span [m]', 'Bending Moment [N*m]')
 plotter(testForces.span, wb.bendingDisplacement, 'Span [m]', 'Horizontal Displacement [m]')
 #
 plotter(testForces.span, wb.torsionalStiffness, 'Span [m]', 'Torsional Stiffness [m^4]')
-plotter(testForces.span, testForces.torque, 'Span [m]', 'Torque [N*m]')
+plotter(testForces.span, testForces.twistFunction, 'Span [m]', 'Torque [N*m]')
 plotter(testForces.span, wb.twistDisplacement, 'Span [m]', 'Twist Displacement [deg]')
 end = time.time()
-print(end - start)
+print('total time')
+print(end - zeroTIme)
 start = time.time()

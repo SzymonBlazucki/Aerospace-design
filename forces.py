@@ -96,3 +96,7 @@ class Forces:
             out.append(torqueDist)
         self.twistFunction = interp(x, np.array(out))
         return np.array(out)
+
+    def BendingStressWOylocation(self,x):
+        # Divide moment by inertia
+        return self.bendingMoment(x) /

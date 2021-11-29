@@ -83,6 +83,7 @@ class Wingbox:
         for y in x:
             twist, trash = quad(interp(x, func(x)), 0, y)
             out.append(twist)
+        # out = np.array(list(map(lambda i: quad(func, i, self.Forces.b2)[0], x)))
         return np.array(out) * 180 / math.pi  # you sure about this output?
 
     def bendingDisplacement(self, x):

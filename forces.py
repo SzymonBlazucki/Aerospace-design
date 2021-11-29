@@ -70,6 +70,23 @@ class Forces:
         # out = []
         def d(x):  # Distance between wb centroid and xcp
             return (self.xCp(x) - self.xCentroid) * self.chord(x)
+<<<<<<< HEAD
+
+        def h(x):  # Function of distance * shear
+            return interp(x, d(x) * self.shearFunction(
+                x))  # - self.moment(x)) # Cm is  not included becaus it comes from Cl
+
+        for y in x:
+            torqueDist, trash = quad(h(x), y, self.b2)
+            out.append(torqueDist)
+        self.twistFunction = interp(x, np.array(out))
+        return np.array(out)
+
+
+    def BendingStressWOylocation(self, x):
+        # Divide moment by inertia
+        return self.bendingMoment(x)
+=======
         h = interp(x, d(x) * self.shearFunction(x))  # Function of distance * shear
         #
         # for y in x:
@@ -78,3 +95,4 @@ class Forces:
         out = np.array(list(map(lambda i: quad(h, i, self.b2)[0], x)))
         self.twistFunction = interp(x, out)
         return out
+>>>>>>> origin/main

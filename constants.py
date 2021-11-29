@@ -8,6 +8,6 @@ zeroAngleFirstTable, zeroAngleSecondTable, zeroCl = reader.readXLFR('xlfrData/al
 tenAngleFirstTable, tenAngleSecondTable, tenCl = reader.readXLFR('xlfrData/alpha10.csv')
 
 
-def interp(x, y):
-    f = interpolate.interp1d(x, y, kind='cubic', fill_value='extrapolate')
+def interp(x, y, kind='cubic'):
+    f = interpolate.interp1d(x, y, kind=kind, fill_value='extrapolate')
     return f

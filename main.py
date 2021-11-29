@@ -87,6 +87,7 @@ print(end - start)
 start = time.time()
 
 plotter(testForces.span, testForces.verticalForce, 'Span [m]', 'Vertical force per span [N/m]')
+plotter(testForces.span, testForces.verticalForceFunction, 'Span [m]', 'Vertical force per span [N/m] - from interpolation')
 end = time.time()
 print(end - start)
 start = time.time()

@@ -36,6 +36,7 @@ class Forces:
         self.weightFunction = interp(self.span, self.weight(self.span))
         print('weight time')
         print(start - time.time())
+        self.verticalForceFunction = interp(self.span, self.verticalForce(self.span))
         self.shearForce(self.span)
         self.bendingMoment(self.span)
         self.torque(self.span)
@@ -61,7 +62,7 @@ class Forces:
 
     def shearForce(self, x):
         start = time.time()
-        out = np.array(list(map(lambda i: quad(self.verticalForce, i, self.b2)[0], x)))
+        out = np.array(list(map(lambda i: quad(self.verticalForceFunction, i, self.b2)[0], x)))
         # for y in x:
         #     shearDist, trash = quad(self.verticalForce, y, self.b2)
         #     out.append(shearDist)

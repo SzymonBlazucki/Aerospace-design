@@ -87,9 +87,12 @@ print(end - start)
 start = time.time()
 
 plotter(testForces.span, testForces.verticalForce, 'Span [m]', 'Vertical force per span [N/m]')
+end = time.time()
+print(end - start)
+start = time.time()
 plotter(testForces.span, testForces.weight, 'Span [m]', 'Weight per span [N/m]')
 plotter(testForces.span, testForces.drag, 'Span [m]', 'Drag per span [N/m]')
-plotter(testForces.span, testForces.shearForce, 'Span [m]', 'Shear Diagram [N]')
+plotter(testForces.span, testForces.shearFunction, 'Span [m]', 'Shear Diagram [N]')
 #
 plotter(testForces.span, wb.momentInertiaX, 'Span [m]', 'Moment of Inertia [m^4]')
 plotter(testForces.span, testForces.bendingMoment, 'Span [m]', 'Bending Moment [N*m]')

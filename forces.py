@@ -61,20 +61,18 @@ class Forces:
 
     def shearForce(self, x):
         start = time.time()
-        out = []
-        for y in x:
-            shearDist, trash = quad(self.verticalForce, y, self.b2)
-            out.append(shearDist)
+        out = np.array(list(map(lambda i: quad(self.verticalForce, i, self.b2)[0], x)))
+        # for y in x:
+        #     shearDist, trash = quad(self.verticalForce, y, self.b2)
+        #     out.append(shearDist)
         print(start - time.time())
         start = time.time()
-        self.shearFunction = interp(x, np.array(out))
+        self.shearFunction = interp(x, out)
         print('Interp time')
         print(start - time.time())
-        return np.array(out)
+        return out
 
     def bendingMoment(self, x):  # add moment
-        if self.shearFunction is None:
-            self.shearForce(x)
         out = []
         for y in x:
             shearDist, trash = quad(self.shearFunction, y, self.b2)
@@ -84,8 +82,6 @@ class Forces:
 
     def torque(self, x):
         out = []
-        if self.shearFunction is None:
-            self.shearForce(x)
 
         def d(x):  # Distance between wb centroid and xcp
             return (self.xCp(x) - self.xCentroid) * self.chord(x)

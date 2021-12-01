@@ -18,11 +18,16 @@ class Failure:
         yCentroid = np.tile(np.array([self.Wingbox.yBarWingbox(x)]).transpose(), (1, cols))
         return (yCentroid - stringerY)
 
-    def StressTorsion(self, x):
-        # calculate the stress due to torsion without y location
-        consttorsion = - self.Forces.bendingMoment(x)/self.Wingbox.momentInertiaX(x)
+    # Stringer buckling at the root (root has the critical stress due to bending)
+    def StressBending(self, x):
+        # calculate the stress due to torsion without y location as a function of span
+        constbending = - self.Forces.bendingMoment(x)[0] / self.Wingbox.momentInertiaX(x)[0]
 
-        # get the y location of the stringers w.r.t the neutral axis
-        print(f"The locations {self.yDistance(x)[0]}")
-        return consttorsion
+        # get the y location of the stringers w.r.t the neutral axis and convert it to [m]
+        ydistance = self.yDistance(x)[0] * self.Forces.chord(x)[0]
+
+        # output result for stress at all stringers at the root
+        out = constbending * ydistance
+
+        return out
 

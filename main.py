@@ -89,8 +89,6 @@ end = time.time()
 print(end - start)
 # failure mode
 failuremode = Failure(forces=testForces, wingbox=wb, stringer=strng)
-plotter(testForces.span, failuremode.StressTorsion, 'Span [m]', 'const')
-
 
 # start = time.time()
 # plotter(testForces.span, testForces.verticalForce, 'Span [m]', 'Vertical force per span [N/m]')

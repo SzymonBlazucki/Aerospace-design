@@ -47,11 +47,11 @@ class Wingbox:
             # print(yCentroid)
             length = (yCentroid - stringerY) ** 2
             # print(length)
-            lengthCorrection = np.where(stringerY == 0, stringerY, length)
-            # print(lengthCorrection)
+            lengthCorrection = np.where(stringerY == 0, stringerY, length) * self.Stringer.areaArr
+
             return np.sum(lengthCorrection, axis=1)
 
-        return distance() * self.Stringer.area * self.Forces.chord(x) ** 2
+        return distance() * self.Forces.chord(x) ** 2
 
     def momentInertiaX(self, x):
         Ix = (1 / 12 * self.t1 * 0.0662 ** 3 + self.t1 * 0.0662 * (0.0395 - self.yBarWingbox(x)) ** 2 +

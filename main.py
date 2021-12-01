@@ -67,11 +67,20 @@ eng = Engine()
 #     angle = float(angle)
 
 # DEBUG
-strArea = 0.005
+
 wbThickness = [0.03, 0.05, 0.01, 0.03]
+
+# 0 type is L, 1 is Hat
+strArea = [0.005, 0.01]
+strIxx = [0.00005, 0.00005]
+
+topType = [1, 1, 1, 1]
 topStringers = [16, 12, 10, 8]
+
+botType = [0, 0, 0]
 botStringers = [13, 9, 6]
-strng = Stringer(strArea, np.array(topStringers), np.array(botStringers), wbthickness=wbThickness)
+
+strng = Stringer(strIxx, topType, botType, strArea, np.array(topStringers), np.array(botStringers), wbthickness=wbThickness)
 velocity = 250
 angle = 10
 

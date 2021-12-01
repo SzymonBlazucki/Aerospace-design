@@ -26,7 +26,7 @@ class Stringe
                 out = j
             else:
                 out = np.vstack([out, j])
-        return np.ones_like(out)
+        return (out>0)*1
 
     def topYPos(self):  # y-position of stringers in top
         return 0.016222222222 * self.topXPos + 0.0653
@@ -51,7 +51,11 @@ class Stringe
     def YPos(self):
         return np.concatenate((self.botYPos(), self.topYPos()))
 
-
+    def IxxStringer(self):
+        # there are two types of stingers
+        # head stringer (I) or l stringer (0)
+        # replace array item by Ixx
+        return out
 
 class Engine:  # coordinates with respect to local chord
     xPos = 9.18  # [m]

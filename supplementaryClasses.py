@@ -2,11 +2,11 @@ import numpy as np
 from constants import g
 
 
-class Stringer:
+class Stringe
     def __init__(self, areaStr, topStr, botStr, wbthickness):
         self.area = areaStr  # area of stringer
-        self.topStr = np.concatenate((np.array([28]), topStr, np.array([28])))  # add corner stringers
-        self.botStr = np.concatenate((np.array([28]), botStr, np.array([28])))
+        self.topStr = topStr
+        self.botStr = botStr
         self.totalStr = np.concatenate((self.botStr, self.topStr))
         self.thickness = wbthickness
         self.topXPos = np.linspace(0.00000001, 0.45, len(self.topStr))

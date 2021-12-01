@@ -67,7 +67,6 @@ class Forces:
         return out
 
     def torque(self, x):
-        # out = []
         def d(x):  # Distance between wb centroid and xcp
             return (self.xCp(x) - self.xCentroid) * self.chord(x)
         h = interp(x, d(x) * self.shearFunction(x))  # Function of distance * shear

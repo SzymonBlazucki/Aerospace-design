@@ -8,3 +8,7 @@ class Failure:
         self.Forces = forces
         self.Wingbox = wingbox
         self.Stringer = stringer
+
+    def StressTorsion(self, x):
+        constTorsion = - self.Forces.bendingMoment(x)/self.Wingbox.momentInertiaX(x)
+        return constTorsion

@@ -8,6 +8,7 @@
 import math
 from forces import Forces
 from wingbox import Wingbox
+from failure import Failure
 from supplementaryClasses import Stringer, Engine
 import matplotlib.pyplot as plt
 import numpy as np
@@ -86,6 +87,10 @@ wb = Wingbox(forces=testForces, shearMod=(26 * 10 ** 9), youngsModulus=(68.9 * 1
              stringer=strng, sweep=27)
 end = time.time()
 print(end - start)
+# failure mode
+failuremode = Failure(forces=testForces, wingbox=wb, stringer=strng)
+plotter(testForces.span, failuremode.StressTorsion, 'Span [m]', 'const')
+
 start = time.time()
 
 plotter(testForces.span, testForces.verticalForce, 'Span [m]', 'Vertical force per span [N/m]')

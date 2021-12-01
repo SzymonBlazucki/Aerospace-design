@@ -1,23 +1,23 @@
 import numpy as np
 from constants import g
 
-# def Arrayize(array):
-
+def arrayize(array, type): # returnarray with length number of stringers, including effect of stringer type
+    for i in range(len(array)):
+        if i == 0:
+            out = (type == 0) * array[0]
+        else:
+            out += (type == i) * array[i]
+    return out
 
 class Stringer:
-    def __init__(self, strIxx, topType, botType, areaStr, topStr, botStr, wbthickness):
+    def __init__(self, IxxStr, topType, botType, areaStr, topStr, botStr, wbthickness):
         self.topType = np.concatenate((np.array([0]), topType, np.array([0])))
         self.botType = np.concatenate((np.array([0]), botType, np.array([0])))
         self.totalType = np.concatenate((self.botType, self.topType))
 
-        self.strIxx = strIxx
-        self.area = areaStr  # area of stringer
-
-        for i in range(len(self.area)):
-            if i == 0:
-                self.areaArr = (self.totalType == 0) * self.area[0]
-            else:
-                self.areaArr += (self.totalType == i) * self.area[i]
+        self.strIxx = arrayize(IxxStr, self.totalType)
+        # self.area = areaStr  # area of stringer
+        self.areaArr = arrayize(areaStr, self.totalType)
 
         self.topStr = np.concatenate((np.array([28]), topStr, np.array([28])))  # add corner stringers
         self.botStr = np.concatenate((np.array([28]), botStr, np.array([28])))
@@ -68,11 +68,6 @@ class Stringer:
     def YPos(self):
         return np.concatenate((self.botYPos(), self.topYPos()))
 
-    def IxxStringer(self):
-        # there are two types of stingers
-        # head stringer (I) or l stringer (0)
-        # replace array item by Ixx
-        return out
 
 class Engine:  # coordinates with respect to local chord
     xPos = 9.18  # [m]

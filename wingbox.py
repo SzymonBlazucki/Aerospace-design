@@ -38,13 +38,23 @@ class Wingbox:
                 self.Stringer.areaTot(x))
         return yBar
 
+    def strYDistance(self, x):
+        # Get the y locations of the stringer
+        stringerY = self.Stringer.activeStringers(self.Stringer.totalStr, x) * self.Stringer.YPos()
+
+        rows, cols = stringerY.shape
+        yCentroid = np.tile(np.array([self.yBarWingbox(x)]).transpose(), (1, cols))
+        return (yCentroid, stringerY)
+
     def steinerTerm(self, x):
         def distance():
-            stringerY = self.Stringer.activeStringers(self.Stringer.totalStr, x) * self.Stringer.YPos()
-            rows, cols = stringerY.shape
-            # print(stringerY)
-            yCentroid = np.tile(np.array([self.yBarWingbox(x)]).transpose(), (1, cols))
-            # print(yCentroid)
+            # stringerY = self.Stringer.activeStringers(self.Stringer.totalStr, x) * self.Stringer.YPos()
+            # rows, cols = stringerY.shape
+            # # print(stringerY)
+            # yCentroid = np.tile(np.array([self.yBarWingbox(x)]).transpose(), (1, cols))
+            # # print(yCentroid)
+            yCentroid, stringerY = self.strYDistance(x)
+
             length = (yCentroid - stringerY) ** 2
             # print(length)
             lengthCorrection = np.where(stringerY == 0, stringerY, length) * self.Stringer.areaArr

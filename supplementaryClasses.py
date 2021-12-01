@@ -51,7 +51,11 @@ class Stringer:
     def YPos(self):
         return np.concatenate((self.botYPos(), self.topYPos()))
 
-
+    def IxxStringer(self):
+        # there are two types of stingers
+        # head stringer (I) or l stringer (0)
+        # replace array item by Ixx
+        return out
 
 class Engine:  # coordinates with respect to local chord
     xPos = 9.18  # [m]

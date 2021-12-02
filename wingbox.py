@@ -1,14 +1,12 @@
 import numpy as np
 from scipy.integrate import quad
 import math
-from constants import interp
+from constants import interp, E, G
 
 
 class Wingbox:
-    def __init__(self, forces, shearMod, youngsModulus, sweep, stringer):
+    def __init__(self, forces, sweep, stringer):
         self.Forces = forces
-        self.E = youngsModulus
-        self.G = shearMod
         self.sweep = sweep
         self.t = stringer.thickness
         self.t1 = self.t[0]
@@ -88,7 +86,7 @@ class Wingbox:
 
         def func(x):
             return (self.Forces.twistFunction(x) * math.cos(self.sweep) + self.Forces.bendingFunction(x) * math.sin(
-                self.sweep)) / (self.G * self.torsionalStiffness(x))
+                self.sweep)) / (G * self.torsionalStiffness(x))
 
         for y in x:
             twist, trash = quad(interp(x, func(x)), 0, y)
@@ -101,7 +99,7 @@ class Wingbox:
 
         def funcTheta(x):
             return -(- self.Forces.twistFunction(x) * math.sin(self.sweep) + self.Forces.bendingFunction(x) * math.cos(
-                self.sweep)) / (self.E * self.momentInertiaX(x))  # check please nto sure if I want x or y
+                self.sweep)) / (E * self.momentInertiaX(x))  # check please nto sure if I want x or y
 
         for y in x:
             twist, trash = quad(interp(x, funcTheta(x)), 0, y)

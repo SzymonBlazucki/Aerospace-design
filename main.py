@@ -71,7 +71,7 @@ eng = Engine()
 wbThickness = [0.03, 0.05, 0.01, 0.03]
 
 # 0 type is L, 1 is Hat
-strArea = [0.005, 0.01]
+strArea = [0.00005, 0.0001]
 strIxx = [0.00005, 0.00005]
 
 topType = [1, 1, 1, 1]
@@ -92,21 +92,19 @@ testForces = Forces([zeroAngleFirstTable, tenAngleFirstTable],
 end = time.time()
 print(end - start)
 start = time.time()
-wb = Wingbox(forces=testForces, shearMod=(26 * 10 ** 9), youngsModulus=(68.9 * 10 ** 9),
-             stringer=strng, sweep=27)
+wb = Wingbox(forces=testForces, stringer=strng, sweep=27)
 end = time.time()
 print(end - start)
 # failure mode
 failuremode = Failure(forces=testForces, wingbox=wb, stringer=strng)
 
 # Check statements
-# print(failuremode.stressBending(testForces.span))
-# print(failuremode.columnBuckling())
+# print(f"Stresses: {failuremode.stressBending(testForces.span)}")
+# print(f"Buckling Stress{failuremode.columnBuckling()}")
+print(f"Margin of safety {failuremode.stressBending(testForces.span)/failuremode.columnBuckling()}") # MArgin of Safety
 # print(f"Length{failuremode.columBucklingLenght(testForces.span)}")
-
-
 # plotter(testForces.span, failuremode.stressBending, "Span[m]", "Stress due to bending const")
-#
+
 # start = time.time()
 # plotter(testForces.span, testForces.verticalForce, 'Span [m]', 'Vertical force per span [N/m]')
 # plotter(testForces.span, testForces.verticalForceFunction, 'Span [m]',

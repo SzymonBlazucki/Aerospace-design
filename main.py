@@ -99,10 +99,10 @@ print(end - start)
 # failure mode
 failuremode = Failure(forces=testForces, wingbox=wb, stringer=strng)
 
-print(failuremode.StressBending(testForces.span))
+print(failuremode.stressBending(testForces.span))
 
 
-# plotter(testForces.span, failuremode.StressBending, "Span[m]", "Stress due to bending const")
+# plotter(testForces.span, failuremode.stressBending, "Span[m]", "Stress due to bending const")
 #
 # start = time.time()
 # plotter(testForces.span, testForces.verticalForce, 'Span [m]', 'Vertical force per span [N/m]')

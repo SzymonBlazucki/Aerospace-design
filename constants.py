@@ -11,3 +11,4 @@ tenAngleFirstTable, tenAngleSecondTable, tenCl = reader.readXLFR('xlfrData/alpha
 def interp(x, y, kind='cubic'):
     f = interpolate.interp1d(x, y, kind=kind, fill_value='extrapolate')
     return f
+

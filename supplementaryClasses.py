@@ -13,15 +13,15 @@ class Stringer:
     def __init__(self, IxxStr, topType, botType, areaStr, topStr, botStr, wbthickness):
         self.topType = np.concatenate((np.array([0]), topType, np.array([0])))
         self.botType = np.concatenate((np.array([0]), botType, np.array([0])))
-        self.totalType = np.concatenate((self.botType, self.topType))
+        self.totalType = np.concatenate((self.botType, self.topType))  # array for types of all stringers
 
-        self.strIxx = arrayize(IxxStr, self.totalType)
+        self.strIxx = arrayize(IxxStr, self.totalType)  # array for Ixx of all stringers
         # self.area = areaStr  # area of stringer
-        self.areaArr = arrayize(areaStr, self.totalType)
+        self.areaArr = arrayize(areaStr, self.totalType)  # array for area of all stringers
 
-        self.topStr = np.concatenate((np.array([28]), topStr, np.array([28])))  # add corner stringers
+        self.topStr = np.concatenate((np.array([28]), topStr, np.array([28])))
         self.botStr = np.concatenate((np.array([28]), botStr, np.array([28])))
-        self.totalStr = np.concatenate((self.botStr, self.topStr))
+        self.totalStr = np.concatenate((self.botStr, self.topStr))  # array for length of all stringers
 
         self.thickness = wbthickness
         self.topXPos = np.linspace(0.00000001, 0.45, len(self.topStr))

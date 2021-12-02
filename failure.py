@@ -8,7 +8,7 @@ class Failure:
 
 
     # Stringer buckling at the root (root has the critical stress due to bending)
-    def StressBending(self, x):
+    def stressBending(self, x):
         # calculate the stress due to torsion without y location at the root
         constbending = - self.Forces.bendingMoment(x)[0] / self.Wingbox.momentInertiaX(x)[0]
 
@@ -22,7 +22,7 @@ class Failure:
         return out
 
     # Create the item for the stress due to bending
-    def StressBendingGraph(self,x):
+    def stressBendingGraph(self, x):
         # calculate the stress due to bending moment without y location as a function of span
         constbending = - self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x)
         return constbending

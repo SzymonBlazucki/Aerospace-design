@@ -99,7 +99,10 @@ print(end - start)
 # failure mode
 failuremode = Failure(forces=testForces, wingbox=wb, stringer=strng)
 
-print(failuremode.stressBending(testForces.span))
+# Check statements
+# print(failuremode.stressBending(testForces.span))
+# print(failuremode.columnBuckling())
+# print(f"Length{failuremode.columBucklingLenght(testForces.span)}")
 
 
 # plotter(testForces.span, failuremode.stressBending, "Span[m]", "Stress due to bending const")

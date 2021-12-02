@@ -4,6 +4,9 @@ from scipy import interpolate
 g = 9.80665  # [m/s^2] gravity acceleration
 cld = 0.6767
 
+K = 1/4  # constant for column buckling
+E = 68.9E9  # Young's modulus in pascal
+
 zeroAngleFirstTable, zeroAngleSecondTable, zeroCl = reader.readXLFR('xlfrData/alpha0.csv')
 tenAngleFirstTable, tenAngleSecondTable, tenCl = reader.readXLFR('xlfrData/alpha10.csv')
 

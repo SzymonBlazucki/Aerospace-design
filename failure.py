@@ -1,11 +1,12 @@
+import math
+import constants
+import numpy as np
 
 class Failure:
     def __init__(self, forces, wingbox, stringer):
         self.Forces = forces
         self.Wingbox = wingbox
         self.Stringer = stringer
-
-
 
     # Stringer buckling at the root (root has the critical stress due to bending)
     def stressBending(self, x):
@@ -16,9 +17,9 @@ class Failure:
         yCentroid, stringerY = self.Wingbox.strYDistance(x)
         yDistance = (stringerY[0] - yCentroid[0]) * self.Forces.chord(x)[0]
 
-
         # output result for stress at all stringers at the root
         out = constbending * yDistance
+
         return out
 
     # Create the item for the stress due to bending
@@ -27,4 +28,16 @@ class Failure:
         constbending = - self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x)
         return constbending
 
+    # return the critical column buckling stress based on inputs
+    def columnBuckling(self):
+        out = (math.pi**2 * constants.K * constants.E * self.Stringer.strIxx) / \
+              (self.Stringer.totalStr**2 * self.Stringer.areaArr)
+        return out
 
+    # Alternative to columnBuckling, returns required length based on the critical stress at the root
+    def columBucklingLenght(self, x):
+        # Create boolean array based on stress type (compression = 1, tensile =0)
+        cforceboolean = np.where(self.stressBending(x) < 0, 0, 1)
+        out = np.sqrt(cforceboolean * (math.pi**2 * constants.K * constants.E * self.Stringer.strIxx) / \
+              (self.stressBending(x) * self.Stringer.areaArr))
+        return out

@@ -100,14 +100,17 @@ end = time.time()
 print(end - start)
 # failure mode
 failuremode = Failure(forces=testForces, wingbox=wb, stringer=strng)
-print(failuremode.tb(testForces.span))
-plotter(testForces.span, failuremode.stressShear, 'Span [m]', 'Shear stress at spar [Pa]')
+# print(failuremode.tb(testForces.span))
+# plotter(testForces.span, failuremode.stressShear, 'Span [m]', 'Shear stress at spar [Pa]')
+
+a = failuremode.columBucklingLenght(testForces.span)
+b = failuremode.marginBendingIndex(testForces.span)
+print(failuremode.stressBendingmaxspan(testForces.span))
 
 # Check statements
 # print(f"Stresses: {failuremode.stressBending(testForces.span)}")
 # print(f"Buckling Stress{failuremode.columnBuckling()}")
-print(
-    f"Margin of safety {failuremode.stressBending(testForces.span) / failuremode.columnBuckling()}")  # Margin of Safety
+print(f"Margin of safety {failuremode.stressBending(testForces.span) / failuremode.columnBuckling()}")  # Margin of Safety
 # print(f"Length{failuremode.columBucklingLenght(testForces.span)}")
 # plotter(testForces.span, failuremode.stressBending, "Span[m]", "Stress due to bending const")
 

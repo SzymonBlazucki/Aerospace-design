@@ -35,21 +35,44 @@ class Failure:
         return constbending
 
     # return the critical column buckling stress based on inputs
-    def columnBuckling(self):
-        out = (math.pi**2 * K * E * self.Stringer.strIxx) / \
+    def columnBuckling(self,x):
+        # Create boolean array based on stress type (compression = 1, tensile =0)
+        cforceboolean = np.where(self.stressBending(x) > 0, 0, 1)
+        out = cforceboolean * (math.pi**2 * K * E * self.Stringer.strIxx) / \
               (self.Stringer.totalStr**2 * self.Stringer.areaArr)
         return out
 
     # Alternative to columnBuckling, returns required length based on the critical stress at the root
     def columBucklingLenght(self, x):
         # Create boolean array based on stress type (compression = 1, tensile =0)
-        cforceboolean = np.where(self.stressBending(x) < 0, 0, 1)
+        cforceboolean = np.where(self.stressBending(x) > 0, 0, 1)
         out = np.sqrt(cforceboolean * (math.pi**2 * K * E * self.Stringer.strIxx) / \
               (self.stressBending(x) * self.Stringer.areaArr))
         return out
 
-
     def webBuckling(self, x):
         criticalShear = math.pi ** 2 * k_s * E / 12 / (1-v ** 2) * (t/b)
 
+    def marginBendingIndex(self,x):
+        out = - self.stressBending(x) / self.columnBuckling(x)
+        critical_point = np.where(out > 0, out, np.inf).argmin()
+        return critical_point
 
+    # Stringer buckling at the root (root has the critical stress due to bending)
+    def stressBendingmaxspan(self, x):
+        # find the index of the critical stringer
+        index = self.marginBendingIndex(x)
+        print(index)
+        # calculate the stress due to torsion without y location at the root
+        constbending = self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x)
+
+        # get the y location of the stringers w.r.t the neutral axis and convert it to [m]
+        yCentroid, stringerY = self.Wingbox.strYDistance(x)
+        yDistance = (stringerY[index][:] - yCentroid[index][:])
+        print(yDistance)
+        yDistance2 = yDistance * self.Forces.chord(x)
+
+        # output result for stress at all stringers at the root
+        out = constbending * yDistance2
+
+        return out

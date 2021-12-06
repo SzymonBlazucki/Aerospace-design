@@ -49,11 +49,14 @@ class Failure:
                       (self.stressBending(x) * self.Stringer.areaArr))
         return out
 
-    def tb(self, x):
+    def ab(self, x):
         rb = self.Wingbox.ribs
         out = np.array(list(map(lambda i: max(rb[rb < i]), x)))
 
-        return (x-out)
+        return (x - out)
+
+    def tb(self, x):  # to be modified, for now good enough
+        return self.Wingbox.t / (0.45 * self.forces.chord(x))
 
     def skinBuckling(self, x, k=7.8):  # please confirm what value of K I should use
         allStress = math.pi ** 2 * k * E * self.tb(x) ** 2 / (12 * (1 - v ** 2))  # check that

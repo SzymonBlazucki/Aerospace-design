@@ -5,7 +5,7 @@ from constants import interp, E, G
 
 
 class Wingbox:
-    def __init__(self, forces, sweep, stringer):
+    def __init__(self, forces, sweep, stringer, ribs):
         self.Forces = forces
         self.sweep = sweep
         self.t = stringer.thickness
@@ -14,6 +14,7 @@ class Wingbox:
         self.t3 = self.t[2]
         self.t4 = self.t[3]
         self.Stringer = stringer
+        self.ribs = ribs
 
     # Thickness of wingbox sides in clockwise direction starting from trailing edge
 
@@ -117,3 +118,4 @@ class Wingbox:
             twist, trash = quad(interp(x, thetaFun(x)), 0, y)
             out1.append(twist)
         return np.array(out1)  # np.array(out) * 360 / 2 * math.pi #
+

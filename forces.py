@@ -77,4 +77,3 @@ class Forces:
         out = np.array(list(map(lambda i: quad(h, i, self.b2)[0], x)))
         self.twistFunction = interp(x, out)
         return out
-

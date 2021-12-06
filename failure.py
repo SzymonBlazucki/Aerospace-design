@@ -1,5 +1,5 @@
 import math
-from constants import E, K
+from constants import E, K, v, k_s
 import numpy as np
 
 class Failure:
@@ -30,7 +30,7 @@ class Failure:
 
     # return the critical column buckling stress based on inputs
     def columnBuckling(self):
-        out = (math.pi**2 * self.K * self.E * self.Stringer.strIxx) / \
+        out = (math.pi**2 * K * E * self.Stringer.strIxx) / \
               (self.Stringer.totalStr**2 * self.Stringer.areaArr)
         return out
 
@@ -38,10 +38,12 @@ class Failure:
     def columBucklingLenght(self, x):
         # Create boolean array based on stress type (compression = 1, tensile =0)
         cforceboolean = np.where(self.stressBending(x) < 0, 0, 1)
-        out = np.sqrt(cforceboolean * (math.pi**2 * self.K * self.E * self.Stringer.strIxx) / \
+        out = np.sqrt(cforceboolean * (math.pi**2 * K * E * self.Stringer.strIxx) / \
               (self.stressBending(x) * self.Stringer.areaArr))
         return out
 
 
     def webBuckling(self, x):
-        criticalShear = math.pi() ** 2 * k_s * self.E
+        criticalShear = math.pi ** 2 * k_s * E / 12 / (1-v ** 2) * (t/b)
+
+

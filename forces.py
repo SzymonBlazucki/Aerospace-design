@@ -62,7 +62,7 @@ class Forces:
         return out
 
     def bendingMoment(self, x):  # add moment
-        out = np.array(list(map(lambda i: quad(self.shearFunction, i, self.b2)[0], x)))
+        out = -np.array(list(map(lambda i: quad(self.shearFunction, i, self.b2)[0], x)))
         self.bendingFunction = interp(x, out)
         return out
 

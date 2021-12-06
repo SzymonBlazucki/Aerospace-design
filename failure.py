@@ -1,5 +1,5 @@
 import math
-from constants import E, K, v, k_s
+from constants import E, K
 import numpy as np
 
 class Failure:
@@ -7,6 +7,12 @@ class Failure:
         self.Forces = forces
         self.Wingbox = wingbox
         self.Stringer = stringer
+
+
+    def stressShear(self, x):
+        # return [self.Forces.torque(x) / (2 * self.Wingbox.enclosedArea(x) * self.Stringer.thickness[0]),  # thickness aft spar
+        #        self.Forces.torque(x) / (2 * self.Wingbox.enclosedArea(x) * self.Stringer.thickness[2])]  # thickness front spar
+        return self.Forces.torque(x) / (2 * self.Wingbox.enclosedArea(x) * self.Stringer.thickness[0])  # Aft spar is the critical, more stress
 
     # Stringer buckling at the root (root has the critical stress due to bending)
     def stressBending(self, x):

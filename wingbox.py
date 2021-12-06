@@ -17,6 +17,11 @@ class Wingbox:
 
     # Thickness of wingbox sides in clockwise direction starting from trailing edge
 
+    def enclosedArea(self, x):
+        return (0.6-0.15) * (0.0662 + 0.0653) / 2 * self.Forces.chord(x) ** 2
+
+
+
     def xBarWingbox(self, x):
         xBar = (0.6 * self.Forces.chord(x) * self.t1 * 0.0662 +
                 0.225 * self.Forces.chord(x) * self.t2 * 0.45 +

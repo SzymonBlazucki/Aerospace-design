@@ -1,5 +1,5 @@
 import math
-from constants import E, K, v
+from constants import E, K, v, k_s, k_c
 import numpy as np
 
 
@@ -8,12 +8,13 @@ class Failure:
         self.Forces = forces
         self.Wingbox = wingbox
         self.Stringer = stringer
+        self.tAft = self.Stringer.thickness[0]
+        self.tFront = self.Stringer.thickness[2]
 
     def stressShear(self, x):
-        # return [self.Forces.torque(x) / (2 * self.Wingbox.enclosedArea(x) * self.Stringer.thickness[0]),  # thickness aft spar
-        #        self.Forces.torque(x) / (2 * self.Wingbox.enclosedArea(x) * self.Stringer.thickness[2])]  # thickness front spar
-        return self.Forces.torque(x) / (2 * self.Wingbox.enclosedArea(x) * self.Stringer.thickness[
-            0])  # Aft spar is the critical, more stress
+        return [self.Forces.torque(x) / (2 * self.Wingbox.enclosedArea(x) * self.tAft),  # thickness aft spar
+                self.Forces.torque(x) / (2 * self.Wingbox.enclosedArea(x) * self.tFront)]  # thickness front spar
+
 
     # Stringer buckling at the root (root has the critical stress due to bending)
     def stressBending(self, x):
@@ -58,14 +59,15 @@ class Failure:
         return (x - out)
 
     def tb(self, x):  # to be modified, for now good enough
-        return self.Wingbox.t / (0.45 * self.forces.chord(x))
+        return self.Wingbox.t / (0.45 * self.Forces.chord(x))
 
-    def skinBuckling(self, x, k=7.8):  # please confirm what value of K I should use
-        allStress = math.pi ** 2 * k * E * self.tb(x) ** 2 / (12 * (1 - v ** 2))  # check that
+    def skinBuckling(self, x):  # please confirm what value of K I should use
+        allStress = math.pi ** 2 * k_c * E * self.tb(x) ** 2 / (12 * (1 - v ** 2))  # check that
         pass
 
     def webBuckling(self, x):
-        criticalShear = math.pi ** 2 * k_s * E / 12 / (1 - v ** 2) * (t / b)
+        return [math.pi ** 2 * k_s * E / 12 / (1 - v ** 2) * (self.tAft / b),
+                math.pi ** 2 * k_s * E / 12 / (1 - v ** 2) * (self.tAft / b)]
 
     def marginBendingIndex(self,x):
         out = - self.stressBending(x) / self.columnBuckling(x)

@@ -55,19 +55,60 @@ class Failure:
     def ab(self, x):
         rb = self.Wingbox.ribs
         out = np.array(list(map(lambda i: max(rb[rb < i]), x)))
-
         return (x - out)
 
     def tb(self, x):  # to be modified, for now good enough
         return self.Wingbox.t / (0.45 * self.Forces.chord(x))
 
+    def b(self):
+        rib = self.Wingbox.ribs
+        output = np.array([])
+        j = 1
+
+        for i in self.Forces.span:
+            if i <= rib[j]:
+                output = np.append(output, rib[j])
+            else:
+                output = np.append(output, rib[j])
+                j += 1
+
+        return [0.0662 * self.Forces.chord(output),  # aft
+               0.0653 * self.Forces.chord(output)]   # front
+
+
     def skinBuckling(self, x):  # please confirm what value of K I should use
         allStress = math.pi ** 2 * k_c * E * self.tb(x) ** 2 / (12 * (1 - v ** 2))  # check that
         pass
 
-    def webBuckling(self, x):
-        return [math.pi ** 2 * k_s * E / 12 / (1 - v ** 2) * (self.tAft / b),
-                math.pi ** 2 * k_s * E / 12 / (1 - v ** 2) * (self.tAft / b)]
+    def webBuckling(self):
+        b = self.b()
+        aft, front = [math.pi ** 2 * k_s * E / 12 / (1 - v ** 2) * (self.tAft / b[0]) ** 2,
+                      math.pi ** 2 * k_s * E / 12 / (1 - v ** 2) * (self.tFront / b[1]) ** 2]
+
+
+        if aft[0] > front[0]:
+            print(f"aft{aft}")
+            return aft, self.tAft
+        else:
+            print(f"front{front}")
+            return front, self.tFront
+
+        # return np.concatenate((aft, front)).max()  # return the highest stress value
+
+
+    def stressShearFlowTorque(self, x):
+        stress = self.Forces.torque(x) / (2 * self.Wingbox.enclosedArea(x))
+        print(f"stress{stress}")
+        return stress
+
+    def marginWeb(self, x):
+        failure, t = self.webBuckling()
+        stress = self.stressShearFlowTorque(x)
+
+        margin = failure / (stress * t)
+        print(f"margin{margin}")
+        return margin
+
 
     def marginBendingIndex(self,x):
         out = - self.stressBending(x) / self.columnBuckling(x)

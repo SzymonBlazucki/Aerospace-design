@@ -80,7 +80,7 @@ topStringers = [16, 12, 10, 8]
 botType = [0, 0, 0]
 botStringers = [13, 9, 6]
 
-ribs = np.array([-0.1, 6, 8, 15, 28.1])
+ribs = np.array([0, 6, 8, 15, 28])
 
 strng = Stringer(strIxx, topType, botType, strArea, np.array(topStringers), np.array(botStringers),
                  wbthickness=wbThickness)
@@ -102,6 +102,10 @@ print(end - start)
 failuremode = Failure(forces=testForces, wingbox=wb, stringer=strng)
 # print(failuremode.tb(testForces.span))
 # plotter(testForces.span, failuremode.stressShear, 'Span [m]', 'Shear stress at spar [Pa]')
+
+plotter(testForces.span, failuremode.marginWeb, 'span', 'MoS Web')
+
+plotter(testForces.span, failuremode.marginWeb, 'span', 'MoS Web')
 
 a = failuremode.columBucklingLenght(testForces.span)
 b = failuremode.marginBendingIndex(testForces.span)
@@ -136,3 +140,4 @@ print(f"Margin of safety {failuremode.stressBending(testForces.span) / failuremo
 # print('total time')
 # print(end - zeroTIme)
 # start = time.time()
+

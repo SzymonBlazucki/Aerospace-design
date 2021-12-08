@@ -4,7 +4,7 @@
 # Set a coordinate system and possibly a sketch of what is what
 # Using Nx, Ny, Nz from xflr file may have been easier, because we won't have to deal with angles or anything else
 # in the csv file, changed the name of the column from CmAirf@chord/4 to CmAirf coz python didnt like it
-
+#
 import math
 from forces import Forces
 from wingbox import Wingbox
@@ -72,7 +72,7 @@ wbThickness = [0.03, 0.05, 0.01, 0.03]
 
 # 0 type is L, 1 is Hat
 strArea = [0.00005, 0.0001]
-strIxx = [0.00005, 0.00005]
+strIxx = [0.00005, 8.23E-7]
 
 topType = [1, 1, 1, 1]
 topStringers = [16, 12, 10, 8]

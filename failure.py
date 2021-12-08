@@ -1,5 +1,5 @@
 import math
-from constants import E, K, v, k_s, k_c
+from constants import E, K, v, k_s, k_c, k_v
 import numpy as np
 
 

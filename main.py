@@ -106,15 +106,13 @@ failuremode = Failure(forces=testForces, wingbox=wb, stringer=strng)
 plotter(testForces.span, failuremode.marginWeb, 'span', 'MoS Web')
 
 plotter(testForces.span, failuremode.marginWeb, 'span', 'MoS Web')
-
-a = failuremode.columBucklingLenght(testForces.span)
-b = failuremode.marginBendingIndex(testForces.span)
-print(failuremode.stressBendingmaxspan(testForces.span))
+plotter(testForces.span[0:], failuremode.marginCriticalS, 'Span [m]', 'Margin[]')
+print(failuremode.marginCriticalS(testForces.span))
 
 # Check statements
 # print(f"Stresses: {failuremode.stressBending(testForces.span)}")
 # print(f"Buckling Stress{failuremode.columnBuckling()}")
-print(f"Margin of safety {failuremode.stressBending(testForces.span) / failuremode.columnBuckling()}")  # Margin of Safety
+# print(f"Margin of safety {failuremode.stressBending(testForces.span) / failuremode.columnBuckling()}")  # Margin of Safety
 # print(f"Length{failuremode.columBucklingLenght(testForces.span)}")
 # plotter(testForces.span, failuremode.stressBending, "Span[m]", "Stress due to bending const")
 
@@ -140,4 +138,3 @@ print(f"Margin of safety {failuremode.stressBending(testForces.span) / failuremo
 # print('total time')
 # print(end - zeroTIme)
 # start = time.time()
-

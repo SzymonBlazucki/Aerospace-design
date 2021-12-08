@@ -31,7 +31,7 @@ class Failure:
         return out
 
     # Create the item for the stress due to bending
-    def stressBendingGraph(self, x):
+    def constBending(self, x):
         # calculate the stress due to bending moment without y location as a function of span
         constbending = self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x)
         return constbending
@@ -42,14 +42,6 @@ class Failure:
         cforceboolean = np.where(self.stressBending(x) > 0, 0, 1)
         out = cforceboolean * (math.pi ** 2 * K * E * self.Stringer.strIxx) / \
               (self.Stringer.totalStr ** 2 * self.Stringer.areaArr)
-        return out
-
-    # Alternative to columnBuckling, returns required length based on the critical stress at the root
-    def columBucklingLenght(self, x):
-        # Create boolean array based on stress type (compression = 1, tensile =0)
-        cforceboolean = np.where(self.stressBending(x) > 0, 0, 1)
-        out = np.sqrt(cforceboolean * (math.pi ** 2 * K * E * self.Stringer.strIxx) / \
-                      (self.stressBending(x) * self.Stringer.areaArr))
         return out
 
     def ab(self, x):
@@ -115,23 +107,35 @@ class Failure:
         critical_point = np.where(out > 0, out, np.inf).argmin()
         return critical_point
 
-    # Stringer buckling at the root (root has the critical stress due to bending)
-    def stressBendingmaxspan(self, x):
-        # find the index of the critical stringer
+    # return the margin due to bending stress of the critical stringer
+    def marginCriticalS(self, x):
         index = self.marginBendingIndex(x)
-        print(index)
-        # calculate the stress due to torsion without y location at the root
-        constbending = self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x)
+        ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
+        stress = self.constBending(x) * ylocation
+        critical_stress = - self.columnBuckling(x)[index]
+        margin = critical_stress / stress
+        print(stress)
+        print(margin)
+        print(critical_stress)
+        return margin
 
-        # get the y location of the stringers w.r.t the neutral axis and convert it to [m]
-        yCentroid, stringerY = self.Wingbox.strYDistance(x)
-        yDistance = (stringerY[index][:] - yCentroid[index][:])
-        print(yDistance)
-        yDistance2 = yDistance * self.Forces.chord(x)
-
-        # output result for stress at all stringers at the root
-        out = constbending * yDistance2
-
-        return out
+    # Stringer buckling at the root (root has the critical stress due to bending)
+    # def stressBendingmaxspan(self, x):
+    #     # find the index of the critical stringer
+    #     index = self.marginBendingIndex(x)
+    #     print(index)
+    #     # calculate the stress due to torsion without y location at the root
+    #     constbending = self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x)
+    #
+    #     # get the y location of the stringers w.r.t the neutral axis and convert it to [m]
+    #     yCentroid, stringerY = self.Wingbox.strYDistance(x)
+    #     yDistance = (stringerY[index][:] - yCentroid[index][:])
+    #     print(yDistance)
+    #     yDistance2 = yDistance * self.Forces.chord(x)
+    #
+    #     # output result for stress at all stringers at the root
+    #     out = constbending * yDistance2
+    #
+    #     return out
 
 # test v3

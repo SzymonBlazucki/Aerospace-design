@@ -103,9 +103,8 @@ failuremode = Failure(forces=testForces, wingbox=wb, stringer=strng)
 # print(failuremode.tb(testForces.span))
 # plotter(testForces.span, failuremode.stressShear, 'Span [m]', 'Shear stress at spar [Pa]')
 
+plotter(testForces.span[0:], failuremode.marginCriticalS, 'Span [m]', 'Margin[]')
 plotter(testForces.span, failuremode.marginWeb, 'span', 'MoS Web')
-
-plotter(testForces.span[0:], failuremode.marginCriticalS, 'Span [m]', 'MoS Stringer')
 
 # Check statements
 # print(f"Stresses: {failuremode.stressBending(testForces.span)}")

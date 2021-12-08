@@ -87,6 +87,12 @@ class Failure:
 
         # return np.concatenate((aft, front)).max()  # return the highest stress value
 
+    def stressShearStressForce(self, x):
+        aft, front = self.b()
+        average = self.Forces.shearForce(x)/(aft * self.tAft + front * self.tFront)
+
+        return average
+
 
     def stressShearFlowTorque(self, x):
         stress = self.Forces.torque(x) / (2 * self.Wingbox.enclosedArea(x))
@@ -95,9 +101,9 @@ class Failure:
 
     def marginWeb(self, x):
         failure, t = self.webBuckling()
-        stress = self.stressShearFlowTorque(x)
+        stress = self.stressShearFlowTorque(x) * t + self.stressShearStressForce(x)
 
-        margin = failure / (stress * t)
+        margin = failure / stress
         print(f"margin{margin}")
         return margin
 

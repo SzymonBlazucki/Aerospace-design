@@ -105,9 +105,7 @@ failuremode = Failure(forces=testForces, wingbox=wb, stringer=strng)
 
 plotter(testForces.span, failuremode.marginWeb, 'span', 'MoS Web')
 
-plotter(testForces.span, failuremode.marginWeb, 'span', 'MoS Web')
-plotter(testForces.span[0:], failuremode.marginCriticalS, 'Span [m]', 'Margin[]')
-print(failuremode.marginCriticalS(testForces.span))
+plotter(testForces.span[0:], failuremode.marginCriticalS, 'Span [m]', 'MoS Stringer')
 
 # Check statements
 # print(f"Stresses: {failuremode.stressBending(testForces.span)}")

@@ -64,3 +64,4 @@ class Failure:
 
     def webBuckling(self, x):
         criticalShear = math.pi ** 2 * k_s * E / 12 / (1 - v ** 2) * (t / b)
+# test

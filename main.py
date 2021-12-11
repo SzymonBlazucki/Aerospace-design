@@ -77,12 +77,12 @@ strArea = [0.0001, 0.0001]
 strIxx = [8.23E-7*100, 8.23E-7*100]
 
 topType = [1, 1, 1, 1]
-topStringers = [18, 18, 18, 18]
+topStringers = [16, 12, 10, 8]
 
 botType = [1, 1, 1]
 botStringers = [13, 9, 6]
 
-ribs = np.array([0, 6, 10, 16, 22, 28])
+ribs = np.array([0, 6, 8, 15, 28])
 
 strng = Stringer(strIxx, topType, botType, strArea, np.array(topStringers), np.array(botStringers),
                  wbthickness=wbThickness)
@@ -93,7 +93,7 @@ testForces = Forces([zeroAngleFirstTable, tenAngleFirstTable],
                     freeVel=velocity, bHalf=28,
                     AoA=math.asin((cld - zeroCl) / (tenCl - zeroCl) * math.sin(math.radians(10))), xCentroid=0.3755,
                     # might've changed
-                    engine=eng, spanSteps=501, stringer=strng, density=2700)
+                    engine=eng, spanSteps=51, stringer=strng, density=2700)
 end = time.time()
 print(end - start)
 start = time.time()
@@ -104,6 +104,8 @@ print(end - start)
 failuremode = Failure(forces=testForces, wingbox=wb, stringer=strng)
 #print(failuremode.ab(testForces.span))
 print('here')
+print(failuremode.ab(testForces.span))
+print(failuremode.b())
 # plotter(testForces.span, failuremode.stressShear, 'Span [m]', 'Shear stress at spar [Pa]')
 
 plotter(testForces.span, failuremode.marginCriticalS, 'Span [m]', 'MoS Stringer', logarithmic=True)
@@ -122,11 +124,11 @@ plotter(testForces.span, failuremode.marginWeb, 'Span [m]', 'MoS Web', logarithm
 #         'Vertical force per span [N/m] - from interpolation')
 # end = time.time()
 # print(end - start)
-# # start = time.time()
-# plotter(testForces.span, testForces.chord, 'Span [m]', 'Chord [m]')
-# plotter(testForces.span, testForces.weight, 'Span [m]', 'Weight per span [N/m]')
-# # plotter(testForces.span, testForces.drag, 'Span [m]', 'Drag per span [N/m]')
-# plotter(testForces.span, testForces.shearFunction, 'Span [m]', 'Shear Diagram [N]')
+# start = time.time()
+#plotter(testForces.span, testForces.chord, 'Span [m]', 'Chord [m]')
+#plotter(testForces.span, testForces.weight, 'Span [m]', 'Weight per span [N/m]')
+# plotter(testForces.span, testForces.drag, 'Span [m]', 'Drag per span [N/m]')
+#plotter(testForces.span, testForces.shearFunction, 'Span [m]', 'Shear Diagram [N]')
 # #
 # plotter(testForces.span, wb.momentInertiaX, 'Span [m]', 'Moment of Inertia [m^4]')
 # plotter(testForces.span, testForces.bendingFunction, 'Span [m]', 'Bending Moment [N*m]')

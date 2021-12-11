@@ -15,7 +15,6 @@ class Failure:
         return [self.Forces.torque(x) / (2 * self.Wingbox.enclosedArea(x) * self.tAft),  # thickness aft spar
                 self.Forces.torque(x) / (2 * self.Wingbox.enclosedArea(x) * self.tFront)]  # thickness front spar
 
-
     # Stringer buckling at the root (root has the critical stress due to bending)
     def stressBending(self, x):
         # calculate the stress due to torsion without y location at the root
@@ -46,34 +45,56 @@ class Failure:
 
     def ab(self, x):
         rb = self.Wingbox.ribs
-        out = np.array(list(map(lambda i: max(rb[rb < i]), x)))
-        return (x - out)
+        outRb = np.roll(rb, -1)
+        filter = np.array(range(0, len(rb)))
+        length = rb[1:] - rb[:-1]
+        outB = np.array(list(map(lambda i: max(outRb[rb < i]), x)))
+        outA = np.array(list(map(lambda i: length[max(filter[rb < i])], x)))
+        return [0.0662 * self.Forces.chord(outB) / outA,  # aft
+                0.0653 * self.Forces.chord(outB) / outA]  # front
 
     def tb(self, x):  # to be modified, for now good enough
-        return self.Wingbox.t / (0.45 * self.Forces.chord(x))
+        rib = self.Wingbox.ribs
+        outRb = np.roll(rib, -1)
+        output = np.array(list(map(lambda i: max(outRb[rib < i]), self.Forces.span)))
+        return self.tAft / output, self.tFront / output
 
     def b(self):
+        # rib = self.Wingbox.ribs
+        # length = self.Forces.chord(rib)
+        # print(f"length{length}")
+        # output = np.array([])
+        # j = 1
+        #
+        # for i in self.Forces.span:
+        #     if i <= rib[j]:
+        #         output = np.append(output, length[j])
+        #     else:
+        #         output = np.append(output, length[j])
+        #         j += 1
+        #
+        # # print(f"b{0.0662 * output, 0.0653 * output}")
+        # return [0.0662 * output,  # aft
+        #        0.0653 * output]   # front
+
         rib = self.Wingbox.ribs
-        length = self.Forces.chord(rib)
-        print(f"length{length}")
-        output = np.array([])
-        j = 1
-
-        for i in self.Forces.span:
-            if i <= rib[j]:
-                output = np.append(output, length[j])
-            else:
-                output = np.append(output, length[j])
-                j += 1
-
-        # print(f"b{0.0662 * output, 0.0653 * output}")
-        return [0.0662 * output,  # aft
-               0.0653 * output]   # front
-
+        outRb = np.roll(rib, -1)
+        output = np.array(list(map(lambda i: max(outRb[rib < i]), self.Forces.span)))
+        return [0.0662 * self.Forces.chord(output),  # aft
+                0.0653 * self.Forces.chord(output)]  # front
 
     def skinBuckling(self, x):  # please confirm what value of K I should use
-        allStress = math.pi ** 2 * k_c * E * self.tb(x) ** 2 / (12 * (1 - v ** 2))  # check that
-        pass
+        # allStress = math.pi ** 2 * k_c * E * self.tb(x) ** 2 / (12 * (1 - v ** 2))  # check that
+        b = self.b()
+        aft, front = math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[0] ** 2, \
+                     math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[1] ** 2
+
+        if aft[0] > front[0]:
+            print(f"aft{aft}")
+            return aft, self.tAft
+        else:
+            print(f"front{front}")
+            return front, self.tFront
 
     def webBuckling(self):
         b = self.b()
@@ -92,7 +113,7 @@ class Failure:
 
     def stressShearStressForce(self, x):
         aft, front = self.b()
-        average = self.Forces.shearForce(x)/(aft * self.tAft + front * self.tFront)
+        average = self.Forces.shearForce(x) / (aft * self.tAft + front * self.tFront)
 
         return average * k_v
 
@@ -110,8 +131,7 @@ class Failure:
         # print(f"marginweb{margin}")
         return margin
 
-
-    def marginBendingIndex(self,x):
+    def marginBendingIndex(self, x):
         out = - self.stressBending(x) / self.columnBuckling(x)
         critical_point = np.where(out > 0, out, np.inf).argmin()
         return critical_point

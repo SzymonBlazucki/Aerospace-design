@@ -148,4 +148,3 @@ class Failure:
         # print(margin)
         # print(critical_stress)
         return margin
-

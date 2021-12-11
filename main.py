@@ -108,7 +108,7 @@ print(failuremode.ab(testForces.span))
 print(failuremode.b())
 # plotter(testForces.span, failuremode.stressShear, 'Span [m]', 'Shear stress at spar [Pa]')
 
-plotter(testForces.span, failuremode.marginCriticalS, 'Span [m]', 'MoS Stringer', logarithmic=True)
+plotter(testForces.span, failuremode.marginStringer, 'Span [m]', 'MoS Stringer', logarithmic=True)
 plotter(testForces.span, failuremode.marginWeb, 'Span [m]', 'MoS Web', logarithmic=True)
 
 # Check statements

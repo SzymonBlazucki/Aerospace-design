@@ -9,11 +9,10 @@ class Failure:
         self.Wingbox = wingbox
         self.Stringer = stringer
         self.tAft = self.Stringer.thickness[0]
+        self.tBot = self.Stringer.thickness[1]
         self.tFront = self.Stringer.thickness[2]
+        self.tTop = self.Stringer.thickness[3]
 
-    def stressShear(self, x):
-        return [self.Forces.torque(x) / (2 * self.Wingbox.enclosedArea(x) * self.tAft),  # thickness aft spar
-                self.Forces.torque(x) / (2 * self.Wingbox.enclosedArea(x) * self.tFront)]  # thickness front spar
 
     # Stringer buckling at the root (root has the critical stress due to bending)
     def stressBending(self, x):
@@ -29,12 +28,6 @@ class Failure:
 
         return out
 
-    # Create the item for the stress due to bending
-    def constBending(self, x):
-        # calculate the stress due to bending moment without y location as a function of span
-        constbending = self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x)
-        return constbending
-
     # return the critical column buckling stress based on inputs
     def columnBuckling(self, x):
         # Create boolean array based on stress type (compression = 1, tensile =0)
@@ -42,6 +35,10 @@ class Failure:
         out = cforceboolean * (math.pi ** 2 * K * E * self.Stringer.strIxx) / \
               (self.Stringer.totalStr ** 2 * self.Stringer.areaArr)
         return out
+
+
+
+
 
     def ab(self, x):
         rb = self.Wingbox.ribs
@@ -57,7 +54,7 @@ class Failure:
         rib = self.Wingbox.ribs
         outRb = np.roll(rib, -1)
         output = np.array(list(map(lambda i: max(outRb[rib < i]), self.Forces.span)))
-        return self.tAft / output, self.tFront / output
+        return self.tBot / output, self.tTop / output
 
     def b(self):
         # rib = self.Wingbox.ribs
@@ -83,18 +80,27 @@ class Failure:
         return [0.0662 * self.Forces.chord(output),  # aft
                 0.0653 * self.Forces.chord(output)]  # front
 
+
+
+
+
+
     def skinBuckling(self, x):  # please confirm what value of K I should use
         # allStress = math.pi ** 2 * k_c * E * self.tb(x) ** 2 / (12 * (1 - v ** 2))  # check that
         b = self.b()
-        aft, front = math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[0] ** 2, \
+        bot, top = math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[0] ** 2, \
                      math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[1] ** 2
 
-        if aft[0] > front[0]:
-            print(f"aft{aft}")
-            return aft, self.tAft
+        if bot[0] > top[0]:
+            print(f"bot{bot}")
+            return bot, self.tBot
         else:
-            print(f"front{front}")
-            return front, self.tFront
+            print(f"top{top}")
+            return top, self.tTop
+
+
+
+
 
     def webBuckling(self):
         b = self.b()
@@ -111,37 +117,38 @@ class Failure:
 
         # return np.concatenate((aft, front)).max()  # return the highest stress value
 
-    def stressShearStressForce(self, x):
+    def shearStressForce(self, x):
         aft, front = self.b()
         average = self.Forces.shearForce(x) / (aft * self.tAft + front * self.tFront)
-
         return average * k_v
 
 
-    def stressShearFlowTorque(self, x):
+    def shearFlowTorque(self, x):
         stress = self.Forces.torque(x) / (2 * self.Wingbox.enclosedArea(x))
         # print(f"stress{stress}")
         return stress
 
     def marginWeb(self, x):
         failure, t = self.webBuckling()
-        stress = self.stressShearFlowTorque(x) * t + self.stressShearStressForce(x)
-
+        stress = self.shearFlowTorque(x) * t + self.shearStressForce(x)
         margin = failure / stress
         # print(f"marginweb{margin}")
         return margin
 
-    def marginBendingIndex(self, x):
+
+
+
+    def indexCritical(self, x):
         out = - self.stressBending(x) / self.columnBuckling(x)
         critical_point = np.where(out > 0, out, np.inf).argmin()
         return critical_point
 
     # return the margin due to bending stress of the critical stringer
-    def marginCriticalS(self, x):
-        index = self.marginBendingIndex(x)
+    def marginStringer(self, x):
+        index = self.indexCritical(x)
         print(f"the index of critical stringer is {index}")
         ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
-        stress = self.constBending(x) * ylocation
+        stress = self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation
         critical_stress = - self.columnBuckling(x)[index]
         margin = critical_stress / stress
         # print(stress)

@@ -9,7 +9,7 @@ class Forces:
     def __init__(self, CLs, freeVel, bHalf, xCentroid, engine, AoA, spanSteps, stringer, density):
         self.v = freeVel
         self.Cl = interp(CLs[0]['y-span'], CLs[0].Cl + (cld - zeroCl) / (tenCl - zeroCl) * (CLs[1].Cl - CLs[0].Cl))
-        self.chord = interp(CLs[0]['y-span'], CLs[0].Chord)
+        self.chord = interp(CLs[0]['y-span'], CLs[0].Chord, 'linear')
         self.lCd = interp(CLs[0]['y-span'], CLs[0].ICd + (cld - zeroCl) / (tenCl - zeroCl) * (CLs[1].ICd - CLs[0].ICd))
         self.xCp = interp(CLs[0]['y-span'], CLs[0].XCP + (cld - zeroCl) / (tenCl - zeroCl) * (CLs[1].XCP - CLs[0].XCP))
         self.Cm = interp(CLs[0]['y-span'],
@@ -53,11 +53,11 @@ class Forces:
     def verticalForce(self, x):
         return self.lift(x) * math.cos(self.AoA) \
                + self.drag(x) * math.sin(self.AoA) \
-               - heaviside(-x + self.engPos, 1) * self.engWeight \
                - self.weightFunction(x)
 
     def shearForce(self, x):
-        out = np.array(list(map(lambda i: quad(self.verticalForceFunction, i, self.b2)[0], x)))
+        out = np.array(list(map(lambda i: quad(self.verticalForceFunction, i, self.b2)[0] - heaviside(-i + self.engPos,
+                                                                                            1) * self.engWeight, x)))
         self.shearFunction = interp(x, out)
         return out
 
@@ -69,6 +69,7 @@ class Forces:
     def torque(self, x):
         def d(x):  # Distance between wb centroid and xcp
             return (self.xCp(x) - self.xCentroid) * self.chord(x)
+
         h = interp(x, d(x) * self.shearFunction(x))  # Function of distance * shear
         #
         # for y in x:

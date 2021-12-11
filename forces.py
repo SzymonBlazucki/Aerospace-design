@@ -30,7 +30,7 @@ class Forces:
         self.engPos = engine.xPos
         self.engWeight = engine.weight
         self.AoA = AoA  # already in radians
-        self.span = np.linspace(0, bHalf, spanSteps)
+        self.span = np.linspace(0.01, bHalf, spanSteps) # I changed here 0 to 0.01, it might break some things, sorry for that
         self.weightFunction = interp(self.span, self.weight(self.span))
         self.verticalForceFunction = interp(self.span, self.verticalForce(self.span))
         self.shearForce(self.span)

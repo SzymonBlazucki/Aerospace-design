@@ -54,18 +54,21 @@ class Failure:
 
     def b(self):
         rib = self.Wingbox.ribs
+        length = self.Forces.chord(rib)
+        print(f"length{length}")
         output = np.array([])
         j = 1
 
         for i in self.Forces.span:
             if i <= rib[j]:
-                output = np.append(output, rib[j])
+                output = np.append(output, length[j])
             else:
-                output = np.append(output, rib[j])
+                output = np.append(output, length[j])
                 j += 1
 
-        return [0.0662 * self.Forces.chord(output),  # aft
-               0.0653 * self.Forces.chord(output)]   # front
+        # print(f"b{0.0662 * output, 0.0653 * output}")
+        return [0.0662 * output,  # aft
+               0.0653 * output]   # front
 
 
     def skinBuckling(self, x):  # please confirm what value of K I should use
@@ -74,15 +77,15 @@ class Failure:
 
     def webBuckling(self):
         b = self.b()
-        aft, front = [math.pi ** 2 * k_s * E / 12 / (1 - v ** 2) * (self.tAft / b[0]) ** 2,
-                      math.pi ** 2 * k_s * E / 12 / (1 - v ** 2) * (self.tFront / b[1]) ** 2]
+        aft, front = [math.pi ** 2 * k_s * E * (self.tAft / b[0]) ** 2 / 12 / (1 - v ** 2) ,
+                      math.pi ** 2 * k_s * E * (self.tFront / b[1]) ** 2 / 12 / (1 - v ** 2) ]
 
 
         if aft[0] > front[0]:
-            print(f"aft{aft}")
+            # print(f"aft{aft}")
             return aft, self.tAft
         else:
-            print(f"front{front}")
+            # print(f"front{front}")
             return front, self.tFront
 
         # return np.concatenate((aft, front)).max()  # return the highest stress value
@@ -91,12 +94,12 @@ class Failure:
         aft, front = self.b()
         average = self.Forces.shearForce(x)/(aft * self.tAft + front * self.tFront)
 
-        return average
+        return average * k_v
 
 
     def stressShearFlowTorque(self, x):
         stress = self.Forces.torque(x) / (2 * self.Wingbox.enclosedArea(x))
-        print(f"stress{stress}")
+        # print(f"stress{stress}")
         return stress
 
     def marginWeb(self, x):
@@ -104,7 +107,7 @@ class Failure:
         stress = self.stressShearFlowTorque(x) * t + self.stressShearStressForce(x)
 
         margin = failure / stress
-        print(f"margin{margin}")
+        # print(f"marginweb{margin}")
         return margin
 
 
@@ -116,6 +119,7 @@ class Failure:
     # return the margin due to bending stress of the critical stringer
     def marginCriticalS(self, x):
         index = self.marginBendingIndex(x)
+        print(f"the index of critical stringer is {index}")
         ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
         stress = self.constBending(x) * ylocation
         critical_stress = - self.columnBuckling(x)[index]

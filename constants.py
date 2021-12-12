@@ -11,6 +11,7 @@ v = 0.33
 k_s = 9.6  # Placeholder, please change
 k_c = 7.8
 k_v = 3/2  # Ratio max shear stress and average shear stress
+k_ic = 29.0E9  # fracture toughness in Pa/m^1/2
 
 zeroAngleFirstTable, zeroAngleSecondTable, zeroCl = reader.readXLFR('xlfrData/alpha0.csv')
 tenAngleFirstTable, tenAngleSecondTable, tenCl = reader.readXLFR('xlfrData/alpha10.csv')

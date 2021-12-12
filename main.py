@@ -93,7 +93,7 @@ testForces = Forces([zeroAngleFirstTable, tenAngleFirstTable],
                     freeVel=velocity, bHalf=28,
                     AoA=math.asin((cld - zeroCl) / (tenCl - zeroCl) * math.sin(math.radians(10))), xCentroid=0.3755,
                     # might've changed
-                    engine=eng, spanSteps=51, stringer=strng, density=2700)
+                    engine=eng, spanSteps=51, stringer=strng, density=2700) # FOr final results keep steps high
 end = time.time()
 print(end - start)
 start = time.time()
@@ -105,12 +105,13 @@ failuremode = Failure(forces=testForces, wingbox=wb, stringer=strng)
 #print(failuremode.ab(testForces.span))
 print('here')
 print(failuremode.ab(testForces.span))
-print(failuremode.b())
+print(failuremode.marginSkin(testForces.span))
+print('above')
 # plotter(testForces.span, failuremode.stressShear, 'Span [m]', 'Shear stress at spar [Pa]')
 
 plotter(testForces.span, failuremode.marginStringer, 'Span [m]', 'MoS Stringer', logarithmic=True)
 plotter(testForces.span, failuremode.marginWeb, 'Span [m]', 'MoS Web', logarithmic=True)
-
+plotter(testForces.span, failuremode.marginSkin, 'Span [m]', 'MoS Skin', logarithmic=True)
 # Check statements
 # print(f"Stresses: {failuremode.stressBending(testForces.span)}")
 # print(f"Buckling Stress{failuremode.columnBuckling()}")
@@ -128,7 +129,7 @@ plotter(testForces.span, failuremode.marginWeb, 'Span [m]', 'MoS Web', logarithm
 #plotter(testForces.span, testForces.chord, 'Span [m]', 'Chord [m]')
 #plotter(testForces.span, testForces.weight, 'Span [m]', 'Weight per span [N/m]')
 # plotter(testForces.span, testForces.drag, 'Span [m]', 'Drag per span [N/m]')
-#plotter(testForces.span, testForces.shearFunction, 'Span [m]', 'Shear Diagram [N]')
+plotter(testForces.span, testForces.shearFunction, 'Span [m]', 'Shear Diagram [N]')
 # #
 # plotter(testForces.span, wb.momentInertiaX, 'Span [m]', 'Moment of Inertia [m^4]')
 # plotter(testForces.span, testForces.bendingFunction, 'Span [m]', 'Bending Moment [N*m]')

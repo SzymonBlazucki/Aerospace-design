@@ -13,7 +13,6 @@ class Failure:
         self.tFront = self.Stringer.thickness[2]
         self.tTop = self.Stringer.thickness[3]
 
-
     # Stringer buckling at the root (root has the critical stress due to bending)
     def stressBending(self, x):
         # calculate the stress due to torsion without y location at the root
@@ -36,10 +35,6 @@ class Failure:
               (self.Stringer.totalStr ** 2 * self.Stringer.areaArr)
         return out
 
-
-
-
-
     def ab(self, x):
         rb = self.Wingbox.ribs
         outRb = np.roll(rb, -1)
@@ -57,39 +52,16 @@ class Failure:
         return self.tBot / output, self.tTop / output
 
     def b(self):
-        # rib = self.Wingbox.ribs
-        # length = self.Forces.chord(rib)
-        # print(f"length{length}")
-        # output = np.array([])
-        # j = 1
-        #
-        # for i in self.Forces.span:
-        #     if i <= rib[j]:
-        #         output = np.append(output, length[j])
-        #     else:
-        #         output = np.append(output, length[j])
-        #         j += 1
-        #
-        # # print(f"b{0.0662 * output, 0.0653 * output}")
-        # return [0.0662 * output,  # aft
-        #        0.0653 * output]   # front
-
         rib = self.Wingbox.ribs
         outRb = np.roll(rib, -1)
         output = np.array(list(map(lambda i: max(outRb[rib < i]), self.Forces.span)))
         return [0.0662 * self.Forces.chord(output),  # aft
                 0.0653 * self.Forces.chord(output)]  # front
 
-
-
-
-
-
     def skinBuckling(self, x):  # please confirm what value of K I should use
         # allStress = math.pi ** 2 * k_c * E * self.tb(x) ** 2 / (12 * (1 - v ** 2))  # check that
-        b = self.b()
         bot, top = math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[0] ** 2, \
-                     math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[1] ** 2
+                   math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[1] ** 2
 
         if bot[0] > top[0]:
             print(f"bot{bot}")
@@ -98,15 +70,10 @@ class Failure:
             print(f"top{top}")
             return top, self.tTop
 
-
-
-
-
     def webBuckling(self):
         b = self.b()
-        aft, front = [math.pi ** 2 * k_s * E * (self.tAft / b[0]) ** 2 / 12 / (1 - v ** 2) ,
-                      math.pi ** 2 * k_s * E * (self.tFront / b[1]) ** 2 / 12 / (1 - v ** 2) ]
-
+        aft, front = [math.pi ** 2 * k_s * E * (self.tAft / b[0]) ** 2 / 12 / (1 - v ** 2),
+                      math.pi ** 2 * k_s * E * (self.tFront / b[1]) ** 2 / 12 / (1 - v ** 2)]
 
         if aft[0] > front[0]:
             # print(f"aft{aft}")
@@ -122,7 +89,6 @@ class Failure:
         average = self.Forces.shearForce(x) / (aft * self.tAft + front * self.tFront)
         return average * k_v
 
-
     def shearFlowTorque(self, x):
         stress = self.Forces.torque(x) / (2 * self.Wingbox.enclosedArea(x))
         # print(f"stress{stress}")
@@ -131,15 +97,22 @@ class Failure:
     def marginWeb(self, x):
         failure, t = self.webBuckling()
         stress = self.shearFlowTorque(x) * t + self.shearStressForce(x)
-        margin = failure / stress
+        margin = failure / stress  # don't we want percentage of failure stress, not the other way around?
         # print(f"marginweb{margin}")
         return margin
 
-
-
+    def marginSkin(self, x):
+        index = self.indexCritical(x)
+        print(f"the index of critical stringer is {index}")
+        ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
+        stress = self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation
+        critical_stress = -self.skinBuckling(x)[0]
+        return stress/critical_stress
+        # return 1 - self.stressBending(x)[0] / self.skinBuckling(x)[0]  # for skin buckling I always want top, fix skin
+        # buckling and stress bending - I want stress at every point not only at the root
 
     def indexCritical(self, x):
-        out = - self.stressBending(x) / self.columnBuckling(x)
+        out = - self.stressBending(x) / self.columnBuckling(x)  # it is dividing be zero sometimes, please fix that
         critical_point = np.where(out > 0, out, np.inf).argmin()
         return critical_point
 

@@ -24,7 +24,7 @@ class Failure:
 
         # output result for stress at all stringers at the root
         out = constbending * yDistance
-
+        print(f"the stresses for stringers {out}")
         return out
 
     # return the critical column buckling stress based on inputs

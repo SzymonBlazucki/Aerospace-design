@@ -19,13 +19,20 @@ zeroTIme = time.time()
 start = time.time()
 
 
-def plotter(x, y, xLabel, yLabel, logarithmic=False):
-    plt.plot(x, y(x))
+def plotter(x, y, xLabel, yLabel, logarithmic=False, redline=None):
+
+    plt.plot(x, y(x), label=yLabel)
+
     if logarithmic:
         plt.yscale("log")
+    if redline:
+        plt.hlines(y=redline, xmin=0, xmax=28, label='Limit', color='r')
+        plt.legend()
+
     plt.title(xLabel + ' vs ' + yLabel)
     plt.xlabel(xLabel)
     plt.ylabel(yLabel)
+    plt.grid(True)
     plt.show()
 
 
@@ -70,7 +77,7 @@ eng = Engine()
 
 # DEBUG
 
-wbThickness = [0.03, 0.05, 0.01, 0.03]
+wbThickness = [0.03, 0.03, 0.03, 0.03]
 
 # 0 type is L, 1 is Hat
 strArea = [0.0001, 0.0001]
@@ -94,24 +101,22 @@ testForces = Forces([zeroAngleFirstTable, tenAngleFirstTable],
                     AoA=math.asin((cld - zeroCl) / (tenCl - zeroCl) * math.sin(math.radians(10))), xCentroid=0.3755,
                     # might've changed
                     engine=eng, spanSteps=51, stringer=strng, density=2700) # FOr final results keep steps high
-end = time.time()
-print(end - start)
-start = time.time()
+# end = time.time()
+# print(end - start)
+# start = time.time()
 wb = Wingbox(forces=testForces, stringer=strng, sweep=27, ribs=ribs)
-end = time.time()
-print(end - start)
+# end = time.time()
+# print(end - start)
 # failure mode
 failuremode = Failure(forces=testForces, wingbox=wb, stringer=strng)
 #print(failuremode.ab(testForces.span))
-print('here')
-print(failuremode.ab(testForces.span))
-print(failuremode.marginSkin(testForces.span))
-print('above')
+# print('here')
+# print(failuremode.ab(testForces.span))
+# print(failuremode.marginSkin(testForces.span))
+# print('above')
 # plotter(testForces.span, failuremode.stressShear, 'Span [m]', 'Shear stress at spar [Pa]')
+#
 
-plotter(testForces.span, failuremode.marginStringer, 'Span [m]', 'MoS Stringer', logarithmic=True)
-plotter(testForces.span, failuremode.marginWeb, 'Span [m]', 'MoS Web', logarithmic=True)
-plotter(testForces.span, failuremode.marginSkin, 'Span [m]', 'MoS Skin', logarithmic=True)
 # Check statements
 # print(f"Stresses: {failuremode.stressBending(testForces.span)}")
 # print(f"Buckling Stress{failuremode.columnBuckling()}")
@@ -129,15 +134,19 @@ plotter(testForces.span, failuremode.marginSkin, 'Span [m]', 'MoS Skin', logarit
 #plotter(testForces.span, testForces.chord, 'Span [m]', 'Chord [m]')
 #plotter(testForces.span, testForces.weight, 'Span [m]', 'Weight per span [N/m]')
 # plotter(testForces.span, testForces.drag, 'Span [m]', 'Drag per span [N/m]')
-plotter(testForces.span, testForces.shearFunction, 'Span [m]', 'Shear Diagram [N]')
-# #
-plotter(testForces.span, wb.momentInertiaX, 'Span [m]', 'Moment of Inertia [m^4]')
-plotter(testForces.span, testForces.bendingFunction, 'Span [m]', 'Bending Moment [N*m]')
+# plotter(testForces.span, testForces.shearFunction, 'Span [m]', 'Shear Diagram [N]')
+# # #
+# plotter(testForces.span, wb.momentInertiaX, 'Span [m]', 'Moment of Inertia [m^4]')
+# plotter(testForces.span, testForces.bendingFunction, 'Span [m]', 'Bending Moment [N*m]')
 plotter(testForces.span, wb.bendingDisplacement, 'Span [m]', 'Horizontal Displacement [m]')
-#
-plotter(testForces.span, wb.torsionalStiffness, 'Span [m]', 'Torsional Stiffness [m^4]')
-plotter(testForces.span, testForces.twistFunction, 'Span [m]', 'Torque [N*m]')
+# #
+# plotter(testForces.span, wb.torsionalStiffness, 'Span [m]', 'Torsional Stiffness [m^4]')
+# plotter(testForces.span, testForces.twistFunction, 'Span [m]', 'Torque [N*m]')
 plotter(testForces.span, wb.twistDisplacement, 'Span [m]', 'Twist Displacement [deg]')
+
+plotter(testForces.span, failuremode.marginStringer, 'Span [m]', 'MoS Stringer', logarithmic=True, redline=1)
+plotter(testForces.span, failuremode.marginWeb, 'Span [m]', 'MoS Web', logarithmic=True, redline=1)
+plotter(testForces.span, failuremode.marginSkin, 'Span [m]', 'MoS Skin', logarithmic=True, redline=1)
 # end = time.time()
 # print('total time')
 # print(end - zeroTIme)

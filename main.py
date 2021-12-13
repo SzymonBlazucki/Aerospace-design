@@ -100,7 +100,7 @@ testForces = Forces([zeroAngleFirstTable, tenAngleFirstTable],
                     freeVel=velocity, bHalf=28,
                     AoA=math.asin((cld - zeroCl) / (tenCl - zeroCl) * math.sin(math.radians(10))), xCentroid=0.3755,
                     # might've changed
-                    engine=eng, spanSteps=501, stringer=strng, density=2700) # FOr final results keep steps high
+                    engine=eng, spanSteps=51, stringer=strng, density=2700) # FOr final results keep steps high
 end = time.time()
 print(end - start)
 start = time.time()
@@ -116,8 +116,8 @@ failuremode = Failure(forces=testForces, wingbox=wb, stringer=strng)
 # print('above')
 print('here')
 print(failuremode.ab(testForces.span)[0])
-plt.plot(testForces.span, failuremode.skinBuckling(testForces.span)[0])
-plt.show()
+# plt.plot(testForces.span, failuremode.skinBuckling(testForces.span)[0])
+# plt.show()
 #plotter(testForces.span, )
 #print(failuremode.stressBendingGen(testForces.span))
 print('above')

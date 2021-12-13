@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.integrate import quad
 import math
-from constants import interp, E, G
+from constants import interp, E, G, factor
 
 
 class Wingbox:
@@ -19,7 +19,7 @@ class Wingbox:
     # Thickness of wingbox sides in clockwise direction starting from trailing edge
 
     def enclosedArea(self, x):
-        return (0.6-0.15) * (0.0662 + 0.0653) / 2 * self.Forces.chord(x) ** 2
+        return (0.6-0.15) * (0.0662 + 0.0653) * factor / 2 * self.Forces.chord(x) ** 2
 
 
 
@@ -40,7 +40,7 @@ class Wingbox:
                (0.0662 * self.t1 * self.Forces.chord(x) + 0.45 * self.t2 * self.Forces.chord(x) +
                 0.0653 * self.t3 * self.Forces.chord(x) + 0.45 * self.t4 * self.Forces.chord(x) +
                 self.Stringer.areaTot(x))
-        return yBar
+        return yBar * factor
 
     def strYDistance(self, x):
         # Get the y locations of the stringer
@@ -68,10 +68,10 @@ class Wingbox:
         return distance() * self.Forces.chord(x) ** 2
 
     def momentInertiaX(self, x):
-        Ix = (1 / 12 * self.t1 * 0.0662 ** 3 + self.t1 * 0.0662 * (0.0395 - self.yBarWingbox(x)) ** 2 +
-              self.t2 * 0.45 * (0.032 - self.yBarWingbox(x)) ** 2 + 1 / 12 * self.t2 * 0.0653 ** 3 +
-              self.t3 * 0.0653 * (0.03265 - self.yBarWingbox(x)) ** 2 +
-              self.t4 * 0.045 * (0.06895 - self.yBarWingbox(x)) ** 2) \
+        Ix = (1 / 12 * self.t1 * (0.0662 * factor) ** 3 + self.t1 * (0.0662 * factor) * (factor*0.0395 - self.yBarWingbox(x)) ** 2 +
+              self.t2 * 0.45 * (0.032 * factor - self.yBarWingbox(x)) ** 2 + 1 / 12 * self.t2 * 0.0653 ** 3 +
+              self.t3 * (0.0653 * factor) * (0.03265 * factor - self.yBarWingbox(x)) ** 2 +
+              self.t4 * 0.045 * (0.06895 * factor - self.yBarWingbox(x)) ** 2) \
              * self.Forces.chord(x) ** 3 + self.steinerTerm(x)
         return Ix
 
@@ -80,10 +80,10 @@ class Wingbox:
     #     return Iy
 
     def lineInteg(self, x):
-        return ((0.0662 / self.t1) + (0.45 / self.t2) + (0.0653 / self.t3) + (0.45 / self.t4)) * self.Forces.chord(x)
+        return ((0.0662 * factor / self.t1) + (0.45 / self.t2) + (0.0653 * factor / self.t3) + (0.45 / self.t4)) * self.Forces.chord(x)
 
     def torsionalStiffness(self, x):
-        J = 4 * (0.0295875 * self.Forces.chord(x) ** 2) ** 2 / self.lineInteg(x)
+        J = 4 * self.enclosedArea(x) ** 2 / self.lineInteg(x)
         return J
 
 

@@ -131,13 +131,13 @@ plotter(testForces.span, failuremode.marginSkin, 'Span [m]', 'MoS Skin', logarit
 # plotter(testForces.span, testForces.drag, 'Span [m]', 'Drag per span [N/m]')
 plotter(testForces.span, testForces.shearFunction, 'Span [m]', 'Shear Diagram [N]')
 # #
-# plotter(testForces.span, wb.momentInertiaX, 'Span [m]', 'Moment of Inertia [m^4]')
-# plotter(testForces.span, testForces.bendingFunction, 'Span [m]', 'Bending Moment [N*m]')
-# plotter(testForces.span, wb.bendingDisplacement, 'Span [m]', 'Horizontal Displacement [m]')
-# #
-# plotter(testForces.span, wb.torsionalStiffness, 'Span [m]', 'Torsional Stiffness [m^4]')
-# plotter(testForces.span, testForces.twistFunction, 'Span [m]', 'Torque [N*m]')
-# plotter(testForces.span, wb.twistDisplacement, 'Span [m]', 'Twist Displacement [deg]')
+plotter(testForces.span, wb.momentInertiaX, 'Span [m]', 'Moment of Inertia [m^4]')
+plotter(testForces.span, testForces.bendingFunction, 'Span [m]', 'Bending Moment [N*m]')
+plotter(testForces.span, wb.bendingDisplacement, 'Span [m]', 'Horizontal Displacement [m]')
+#
+plotter(testForces.span, wb.torsionalStiffness, 'Span [m]', 'Torsional Stiffness [m^4]')
+plotter(testForces.span, testForces.twistFunction, 'Span [m]', 'Torque [N*m]')
+plotter(testForces.span, wb.twistDisplacement, 'Span [m]', 'Twist Displacement [deg]')
 # end = time.time()
 # print('total time')
 # print(end - zeroTIme)

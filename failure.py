@@ -24,7 +24,7 @@ class Failure:
 
         # output result for stress at all stringers at the root
         out = constbending * yDistance
-
+        print(f"the stresses for stringers {out}")
         return out
 
     def testStress(self, x):
@@ -53,7 +53,7 @@ class Failure:
     # return the critical column buckling stress based on inputs
     def columnBuckling(self, x):
         # Create boolean array based on stress type (compression = 1, tensile =0)
-        cforceboolean = np.where(self.stressBending(x) > 0, 0, 1)
+        cforceboolean = np.where(self.stressBending(x) > 0, np.inf, 1)
         out = cforceboolean * (math.pi ** 2 * K * E * self.Stringer.strIxx) / \
               (self.Stringer.totalStr ** 2 * self.Stringer.areaArr)
         return out

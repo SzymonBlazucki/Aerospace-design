@@ -159,6 +159,7 @@ plotter(testForces.span, wb.twistDisplacement, 'Span [m]', 'Twist Displacement [
 plotter(testForces.span, failuremode.marginStringer, 'Span [m]', 'MoS Stringer', logarithmic=True, redline=1)
 plotter(testForces.span, failuremode.marginWeb, 'Span [m]', 'MoS Web', logarithmic=True, redline=1)
 plotter(testForces.span, failuremode.marginSkin, 'Span [m]', 'MoS Skin', logarithmic=True, redline=1)
+
 # end = time.time()
 # print('total time')
 # print(end - zeroTIme)

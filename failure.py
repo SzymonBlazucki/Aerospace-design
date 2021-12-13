@@ -137,7 +137,11 @@ class Failure:
 
 
     def marginCrack(self, x):
-        pass
+        index = self.indexCritical(x)
+        print(f"the index of critical stringer is {index}")
+        ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
+        stress = self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation
+        return self.crackStress() / abs(stress)
 
     def indexCritical(self, x):
         out = - self.stressBending(x) / self.columnBuckling(x)  # it is dividing be zero sometimes, please fix that

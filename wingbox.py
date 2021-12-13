@@ -86,7 +86,7 @@ class Wingbox:
         J = 4 * (0.0295875 * self.Forces.chord(x) ** 2) ** 2 / self.lineInteg(x)
         return J
 
-    # noinspection PyTupleAssignmentBalance
+
     def twistDisplacement(self, x):
         out = []
 

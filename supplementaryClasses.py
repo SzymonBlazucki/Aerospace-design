@@ -1,5 +1,5 @@
 import numpy as np
-from constants import g
+from constants import g, factor
 
 def arrayize(array, type): # returnarray with length number of stringers, including effect of stringer type
     for i in range(len(array)):

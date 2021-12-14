@@ -80,11 +80,11 @@ eng = Engine()
 wbThickness = [0.03, 0.03, 0.03, 0.03]
 
 # 0 type is L, 1 is Hat
-strArea = [0.0001, 0.0001]
-strIxx = [8.23E-7*100, 8.23E-7*100]
+strArea = [0.00015, 0.0001]
+strIxx = [1.1E-6, 4.18E-7]
 
 topType = [1, 1, 1, 1]
-topStringers = [16, 12, 10, 8]
+topStringers = [6, 8, 6, 4]
 
 botType = [1, 1, 1]
 botStringers = [13, 9, 6]
@@ -127,10 +127,10 @@ print('above')
 #
 
 
-plotter(testForces.span, failuremode.marginStringer, 'Span [m]', 'MoS Stringer', logarithmic=True)
-plotter(testForces.span, failuremode.marginWeb, 'Span [m]', 'MoS Web', logarithmic=True)
-plotter(testForces.span, failuremode.marginSkin, 'Span [m]', 'MoS Skin', logarithmic=True)
-plotter(testForces.span, failuremode.marginCrack, 'Span [m]', 'MoS crack', logarithmic=True)
+# plotter(testForces.span, failuremode.marginStringer, 'Span [m]', 'MoS Stringer', logarithmic=True, redline=1)
+# plotter(testForces.span, failuremode.marginWeb, 'Span [m]', 'MoS Web', logarithmic=True, redline=1)
+# plotter(testForces.span, failuremode.marginSkin, 'Span [m]', 'MoS Skin', logarithmic=True, redline=1)
+# plotter(testForces.span, failuremode.marginCrack, 'Span [m]', 'MoS Crack', logarithmic=True, redline=1)
 #plotter(testForces.span, failuremode.testStress, 'Span [m]', 'test stress', logarithmic=False)
 # Check statements
 # print(f"Stresses: {failuremode.stressBending(testForces.span)}")
@@ -149,13 +149,13 @@ plotter(testForces.span, failuremode.marginCrack, 'Span [m]', 'MoS crack', logar
 #plotter(testForces.span, testForces.chord, 'Span [m]', 'Chord [m]')
 # plotter(testForces.span, testForces.weight, 'Span [m]', 'Weight per span [N/m]')
 # plotter(testForces.span, testForces.drag, 'Span [m]', 'Drag per span [N/m]')
-# plotter(testForces.span, testForces.lift, 'Span', 'Lift')
+# plotter(testForces.span, testForces.lift, 'Span', 'Lift per span [N/m]')
 # plotter(testForces.span, testForces.shearFunction, 'Span [m]', 'Shear Diagram [N]')
 # #
-# plotter(testForces.span, wb.momentInertiaX, 'Span [m]', 'Moment of Inertia [m^4]')
-# plotter(testForces.span, testForces.bendingFunction, 'Span [m]', 'Bending Moment [N*m]')
-# plotter(testForces.span, wb.bendingDisplacement, 'Span [m]', 'Horizontal Displacement [m]')
-# #
+plotter(testForces.span, wb.momentInertiaX, 'Span [m]', 'Moment of Inertia [m^4]')
+plotter(testForces.span, testForces.bendingFunction, 'Span [m]', 'Bending Moment [N*m]')
+plotter(testForces.span, wb.bendingDisplacement, 'Span [m]', 'Horizontal Displacement [m]')
+#
 # plotter(testForces.span, wb.torsionalStiffness, 'Span [m]', 'Torsional Stiffness [m^4]')
 # plotter(testForces.span, testForces.twistFunction, 'Span [m]', 'Torque [N*m]')
 # plotter(testForces.span, wb.twistDisplacement, 'Span [m]', 'Twist Displacement [deg]')
@@ -168,3 +168,6 @@ plotter(testForces.span, failuremode.marginStringer, 'Span [m]', 'MoS Stringer',
 # print('total time')
 # print(end - zeroTIme)
 # start = time.time()
+
+
+# print(wb.yBarWingbox(testForces.span))

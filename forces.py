@@ -26,6 +26,9 @@ class Forces:
         self.shearFunction = None
         self.bendingFunction = None
         self.twistFunction = None
+        self.weightFunction = None
+        self.verticalForceFunction = None
+
         self.xCentroid = xCentroid  # x location of wb centroid in chords
         self.dynamicPressure = 1 / 2 * 1.225 * self.v ** 2  # constant rho assumed, update later
         self.engPos = engine.xPos
@@ -41,7 +44,7 @@ class Forces:
     def weight(self, x):
         Area = (self.chord(x) * (
                 0.45 * (self.t2 + self.t4) + 0.063 * self.t1 + 0.0653 * self.t3) + self.Stringer.areaTot(x))
-        return Area * self.density * g
+        return Area * self.density * g * 2.7
 
     def lift(self, x):
         L = self.Cl(x) * self.dynamicPressure * self.chord(x)

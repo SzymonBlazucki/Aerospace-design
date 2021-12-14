@@ -148,8 +148,10 @@ class Failure:
 
     def indexCritical(self, x):
         out = - self.stressBending(x) / self.columnBuckling(x)  # it is dividing be zero sometimes, please fix that
-        critical_point = np.where(out > 0, out, np.inf).argmin()
+        critical_point = np.where(out > 0, out, -np.inf).argmax()
         return critical_point
+
+
 
     def indexCriticalTens(self, x):
         out = - self.stressBending(x) / self.columnBuckling(x)  # it is dividing be zero sometimes, please fix that

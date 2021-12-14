@@ -1,5 +1,5 @@
 import math
-from constants import E, K, v, k_s, k_c, k_v, k_ic, a
+from constants import E, K, v, k_s, k_c, k_v, k_ic, a, sigma_y
 import numpy as np
 
 
@@ -16,7 +16,7 @@ class Failure:
     # Stringer buckling at the root (root has the critical stress due to bending)
     def stressBending(self, x):
         # calculate the stress due to torsion without y location at the root
-        constbending = self.Forces.bendingMoment(x)[0] / self.Wingbox.momentInertiaX(x)[0]
+        constbending = -self.Forces.bendingMoment(x)[0] / self.Wingbox.momentInertiaX(x)[0]
 
         # get the y location of the stringers w.r.t the neutral axis and convert it to [m]
         yCentroid, stringerY = self.Wingbox.strYDistance(x)
@@ -31,12 +31,12 @@ class Failure:
         index = self.indexCritical(x)
         print(f"the index of critical stringer is {index}")
         ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
-        stress = abs(self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation)
+        stress = abs(-self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation)
         return stress
 
     def stressBendingGen(self, x):
         # calculate the stress due to torsion without y location at the root
-        constbending = self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x)
+        constbending = -self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x)
 
         # get the y location of the stringers w.r.t the neutral axis and convert it to [m]
         yCentroid, stringerY = self.Wingbox.strYDistance(x)
@@ -133,7 +133,7 @@ class Failure:
         index = self.indexCritical(x)
         print(f"the index of critical stringer is {index}")
         ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
-        stress = abs(self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation)
+        stress = abs(-self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation)
         critical_stress = self.skinBuckling(x)[0]
         return critical_stress / stress
         # return 1 - self.stressBending(x)[0] / self.skinBuckling(x)[0]  # for skin buckling I always want top, fix skin
@@ -161,10 +161,17 @@ class Failure:
         index = self.indexCritical(x)
         print(f"the index of critical stringer is {index}")
         ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
-        stress = self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation
+        stress = -self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation
         critical_stress = - self.columnBuckling(x)[index]
+        # critical_stress = - self.rankineGordon(x)[index]
+
         margin = critical_stress / stress
-        # print(stress)
-        # print(margin)
-        # print(critical_stress)
+        # print(f"stress{stress}")
+        # print(f"margin{margin}")
+        # print(f"criticalstress{critical_stress}")
         return margin
+
+    def rankineGordon(self, x):
+        a = sigma_y / math.pi ** 2 / E
+        stress_yield = sigma_y / (1 + a * self.Stringer.totalStr ** 2 * self.Stringer.areaArr / self.Stringer.strIxx)
+        return stress_yield

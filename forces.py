@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.integrate import quad
+from scipy import interpolate
 from numpy import heaviside
 import math
 from constants import g, cld, zeroCl, tenCl, interp
@@ -58,11 +59,13 @@ class Forces:
     def shearForce(self, x):
         out = np.array(list(map(lambda i: quad(self.verticalForceFunction, i, self.b2)[0] - heaviside(-i + self.engPos,
                                                                                             1) * self.engWeight, x)))
+        # out =np.array(quad(self.verticalForceFunction, i, self.b2)[0])
         self.shearFunction = interp(x, out)
         return out
 
+
     def bendingMoment(self, x):  # add moment
-        out = -np.array(list(map(lambda i: quad(self.shearFunction, i, self.b2)[0], x)))
+        out = np.array(list(map(lambda i: quad(self.shearFunction, i, self.b2)[0], x)))
         self.bendingFunction = interp(x, out)
         return out
 

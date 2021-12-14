@@ -43,9 +43,10 @@ class Failure:
         yDistance = (stringerY[0] - yCentroid[0]) * self.Forces.chord(x)[0]
 
         # output result for stress at all stringers at the root
-        #out = constbending * yDistance
+        # out = constbending * yDistance
 
-        return np.array(list(map(lambda i : np.amax(i), stringerY)))
+        return np.array(list(map(lambda i: np.amax(i), stringerY)))
+
     def generalisedStress(self, x):
         y = self.Wingbox.steinerTerm(x)
         return self.Forces.bendingFunction(x) * y / self.Wingbox.momentInertiaX(x)
@@ -64,9 +65,10 @@ class Failure:
         filter = np.array(range(0, len(rb)))
         length = rb[1:] - rb[:-1]
         outB = np.array(list(map(lambda i: max(outRb[rb < i]), x)))
+        outB = self.Stringer.activeStringers(self.Stringer.totalStr, x)
         outA = np.array(list(map(lambda i: length[max(filter[rb < i])], x)))
-        return  outA / [0.0662 * self.Forces.chord(outB) ,  # aft
-                 outA / 0.0653 * self.Forces.chord(outB)]  # front
+        return outB  # outA / [0.45 * self.Forces.chord(outB) ,  # aft
+        # outA / 0.45 * self.Forces.chord(outB)]  # front
 
     def tb(self, x):  # to be modified, for now good enough
         rib = self.Wingbox.ribs
@@ -83,7 +85,8 @@ class Failure:
 
     def skinBuckling(self, x):  # please confirm what value of K I should use
         # allStress = math.pi ** 2 * k_c * E * self.tb(x) ** 2 / (12 * (1 - v ** 2))  # check that
-        top = math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[1] ** 2#math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[0] ** 2, \
+        top = math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[
+            1] ** 2  # math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[0] ** 2, \
 
         return top, self.tTop
         # if bot[0] > top[0]:
@@ -104,9 +107,10 @@ class Failure:
         else:
             # print(f"front{front}")
             return front, self.tFront
+
     def crackStress(self):
         # return np.concatenate((aft, front)).max()  # return the highest stress value
-        return k_ic/math.sqrt(math.pi * a)
+        return k_ic / math.sqrt(math.pi * a)
 
     def shearStressForce(self, x):
         aft, front = self.b()
@@ -135,9 +139,8 @@ class Failure:
         # return 1 - self.stressBending(x)[0] / self.skinBuckling(x)[0]  # for skin buckling I always want top, fix skin
         # buckling and stress bending - I want stress at every point not only at the root
 
-
     def marginCrack(self, x):
-        index = self.indexCritical(x)
+        index = self.indexCriticalTens(x)
         print(f"the index of critical stringer is {index}")
         ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
         stress = self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation
@@ -146,6 +149,11 @@ class Failure:
     def indexCritical(self, x):
         out = - self.stressBending(x) / self.columnBuckling(x)  # it is dividing be zero sometimes, please fix that
         critical_point = np.where(out > 0, out, np.inf).argmin()
+        return critical_point
+
+    def indexCriticalTens(self, x):
+        out = - self.stressBending(x) / self.columnBuckling(x)  # it is dividing be zero sometimes, please fix that
+        critical_point = np.where(out < 0, out, np.inf).argmin()
         return critical_point
 
     # return the margin due to bending stress of the critical stringer

@@ -59,22 +59,50 @@ class Failure:
               (self.Stringer.totalStr ** 2 * self.Stringer.areaArr)
         return out
 
+    def zero_runs(a):
+        # Create an array that is 1 where a is 0, and pad each end with an extra 0.
+        iszero = np.concatenate(([0], np.equal(a, 0).view(np.int8), [0]))
+        absdiff = np.abs(np.diff(iszero))
+        # Runs start and end where absdiff is 1.
+        ranges = np.where(absdiff == 1)[0].reshape(-1, 2)
+        return ranges
+
     def ab(self, x):
         rb = self.Wingbox.ribs
-        outRb = np.roll(rb, -1)
+        outRb = np.roll(rb, -1)  # implement diff somewhere
         filter = np.array(range(0, len(rb)))
         length = rb[1:] - rb[:-1]
         outB = np.array(list(map(lambda i: max(outRb[rb < i]), x)))
-        outB = self.Stringer.activeStringers(self.Stringer.totalStr, x)
-        outA = np.array(list(map(lambda i: length[max(filter[rb < i])], x)))
-        return outB  # outA / [0.45 * self.Forces.chord(outB) ,  # aft
-        # outA / 0.45 * self.Forces.chord(outB)]  # front
+        stringersTot = self.Stringer.activeStringers(self.Stringer.totalStr, x)
+        stringersArr = stringersTot[:, -len(self.Stringer.topStr):]
+        fullCol = np.zeros(len(stringersArr[:, 0]))  # column of zeros
+        padded = np.concatenate(([fullCol * 0], np.transpose(np.equal(stringersArr, 0)), [fullCol * 0]),
+                                axis=0).T  # pads left and right column of zeros
+        ones = np.abs(np.diff(padded))  # gives 1 at difference between 0 and 1
+        outBn = np.array(list(map(lambda i: np.amax(np.append(np.diff(np.where(i == 1)[0].reshape(-1, 2)), [1])),
+                                  ones)))  # calculates longest interval between stringers in the unit of stringer
+        # spacing
+        outA = np.array(list(map(lambda i: length[max(filter[rb < i])], x)))  # calculates "a" side of the pannel
+        return outA / (0.45 * self.Forces.chord(outB) * outBn / len(stringersArr[0])), \
+               outA / (0.45 * self.Forces.chord(outB) * outBn / len(stringersArr[0]))  # first aft then front
 
     def tb(self, x):  # to be modified, for now good enough
         rib = self.Wingbox.ribs
         outRb = np.roll(rib, -1)
-        output = 0.0662 * self.Forces.chord(np.array(list(map(lambda i: max(outRb[rib < i]), self.Forces.span))))
-        return self.tBot / output, self.tTop / output
+        # output = 0.0662 * self.Forces.chord(np.array(list(map(lambda i: max(outRb[rib < i]), self.Forces.span))))
+        rb = self.Wingbox.ribs
+        outRb = np.roll(rb, -1)  # implement diff somewhere
+        outB = np.array(list(map(lambda i: max(outRb[rb < i]), x)))
+        stringersTot = self.Stringer.activeStringers(self.Stringer.totalStr, x)
+        stringersArr = stringersTot[:, -len(self.Stringer.topStr):]
+        fullCol = np.zeros(len(stringersArr[:, 0]))  # column of zeros
+        padded = np.concatenate(([fullCol * 0], np.transpose(np.equal(stringersArr, 0)), [fullCol * 0]),
+                                axis=0).T  # pads left and right column of zeros
+        ones = np.abs(np.diff(padded))  # gives 1 at difference between 0 and 1
+        outBn = np.array(list(map(lambda i: np.amax(np.append(np.diff(np.where(i == 1)[0].reshape(-1, 2)), [1])),
+                                  ones)))
+        return self.tBot / (0.45 * self.Forces.chord(outB) * outBn / len(stringersArr[0])), self.tTop / (
+                    0.45 * self.Forces.chord(outB) * outBn / len(stringersArr[0]))
 
     def b(self):
         rib = self.Wingbox.ribs
@@ -89,7 +117,6 @@ class Failure:
             1] ** 2  # math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[0] ** 2, \
 
         return top, self.tTop
-
 
     def webBuckling(self):
         b = self.b()
@@ -145,8 +172,6 @@ class Failure:
         out = - self.stressBending(x) / self.columnBuckling(x)  # it is dividing be zero sometimes, please fix that
         critical_point = np.where(out > 0, out, -np.inf).argmax()
         return critical_point
-
-
 
     def indexCriticalTens(self, x):
         out = - self.stressBending(x) / self.columnBuckling(x)  # it is dividing be zero sometimes, please fix that

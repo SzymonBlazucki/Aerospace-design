@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.integrate import quad
-from scipy import interpolate
 from numpy import heaviside
 import math
 from constants import g, cld, zeroCl, tenCl, interp

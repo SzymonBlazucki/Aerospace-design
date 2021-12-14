@@ -27,13 +27,6 @@ class Stringer:
         self.topXPos = np.linspace(0.00000001, 0.45, len(self.topStr))
         self.botXPos = np.linspace(0.00000001, 0.45, len(self.botStr))
 
-    # def numberStringers(self, ySpan):
-    #     out = np.array([])
-    #     for i in ySpan:
-    #         j = np.count_nonzero(self.totalStr >= i)
-    #         out = np.append(out, j)
-    #     return out
-
     def activeStringers(self, loc, ySpan):
         for i in ySpan:
             j = loc * (loc >= i)
@@ -67,7 +60,6 @@ class Stringer:
 
     def YPos(self):
         return np.concatenate((self.botYPos(), self.topYPos()))
-
 
 class Engine:  # coordinates with respect to local chord
     xPos = 9.18  # [m]

@@ -24,12 +24,12 @@ class Failure:
 
         # output result for stress at all stringers at the root
         out = constbending * yDistance
-        print(f"the stresses for stringers {out}")
+        # print(f"the stresses for stringers {out}")
         return out
 
     def testStress(self, x):
         index = self.indexCritical(x)
-        print(f"the index of critical stringer is {index}")
+        # print(f"the index of critical stringer is {index}")
         ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
         stress = abs(-self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation)
         return stress
@@ -83,18 +83,13 @@ class Failure:
         return [0.0662 * self.Forces.chord(output),  # aft
                 0.0653 * self.Forces.chord(output)]  # front
 
-    def skinBuckling(self, x):  # please confirm what value of K I should use
+    def skinBuckling(self, x):
         # allStress = math.pi ** 2 * k_c * E * self.tb(x) ** 2 / (12 * (1 - v ** 2))  # check that
         top = math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[
             1] ** 2  # math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[0] ** 2, \
 
         return top, self.tTop
-        # if bot[0] > top[0]:
-        #     print(f"bot{bot}")
-        #     return bot, self.tBot
-        # else:
-        #     print(f"top{top}")
-        #     return top, self.tTop
+
 
     def webBuckling(self):
         b = self.b()
@@ -125,13 +120,13 @@ class Failure:
     def marginWeb(self, x):
         failure, t = self.webBuckling()
         stress = self.shearFlowTorque(x) * t + self.shearStressForce(x)
-        margin = failure / stress  # don't we want percentage of failure stress, not the other way around?
+        margin = failure / stress
         # print(f"marginweb{margin}")
         return margin
 
     def marginSkin(self, x):
         index = self.indexCritical(x)
-        print(f"the index of critical stringer is {index}")
+        print(f"the index of critical stringer in compression is {index}")
         ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
         stress = abs(-self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation)
         critical_stress = self.skinBuckling(x)[0]
@@ -141,7 +136,7 @@ class Failure:
 
     def marginCrack(self, x):
         index = self.indexCriticalTens(x)
-        print(f"the index of critical stringer is {index}")
+        print(f"the index of critical stringer in tension is {index}")
         ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
         stress = self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation
         return self.crackStress() / abs(stress)

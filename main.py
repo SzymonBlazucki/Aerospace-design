@@ -20,7 +20,7 @@ def plotter(x, y, xLabel, yLabel, logarithmic=False, lowerlimit=None, upperlimit
         plt.hlines(y=lowerlimit, xmin=0, xmax=28, label='Lower limit', color='r')
         plt.legend()
     if upperlimit:
-        plt.hlines(y=upperlimit, xmin=0, xmax=28, label='Upper limit', color='g')
+        plt.hlines(y=upperlimit, xmin=0, xmax=28, label='Upper limit', color='m')
         plt.legend()
 
     plt.title(xLabel + ' vs ' + yLabel)
@@ -30,20 +30,20 @@ def plotter(x, y, xLabel, yLabel, logarithmic=False, lowerlimit=None, upperlimit
     plt.show()
 
 
-wbThickness = [0.03, 0.03, 0.03, 0.03]
+wbThickness = [0.02, 0.03, 0.02, 0.03]  # order: aft, bot, front, top
 
 # 0 type is L, 1 is Hat
-strArea = [0.00015, 0.0001]
-strIxx = [1.1E-6, 4.18E-7]
+strArea = [0.0005, 0.0005]
+strIxx = [4.18E-7, 4.18E-7]
 
 topType = [1, 1, 1, 1]
-topStringers = [6, 8, 6, 4]
+topStringers = [16, 18, 16, 16]
 
 botType = [1, 1, 1]
 botStringers = [13, 9, 6]
 
-# ribs = np.array([0, 6, 8, 15, 22, 28])
-ribs = np.linspace(0, 28, int(28/14 + 1))
+rib_pitch = 1  # space between ribs in meters
+ribs = np.linspace(0, 28, int(28/rib_pitch + 1))
 
 velocity = 250
 angle = 10

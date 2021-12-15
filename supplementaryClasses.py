@@ -14,7 +14,7 @@ class Stringer:
         self.topType = np.concatenate((np.array([0]), topType, np.array([0])))
         self.botType = np.concatenate((np.array([0]), botType, np.array([0])))
         self.totalType = np.concatenate((self.botType, self.topType))  # array for types of all stringers
-
+        self.cornerIndex = np.where(self.totalType == 0)
         self.strIxx = arrayize(IxxStr, self.totalType)  # array for Ixx of all stringers
         # self.area = areaStr  # area of stringer
         self.areaArr = arrayize(areaStr, self.totalType)  # array for area of all stringers
@@ -26,6 +26,8 @@ class Stringer:
         self.thickness = wbthickness
         self.topXPos = np.linspace(0.00000001, 0.45, len(self.topStr))
         self.botXPos = np.linspace(0.00000001, 0.45, len(self.botStr))
+
+
 
     def activeStringers(self, loc, ySpan):
         for i in ySpan:

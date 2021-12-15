@@ -30,7 +30,7 @@ def plotter(x, y, xLabel, yLabel, logarithmic=False, lowerlimit=None, upperlimit
     plt.show()
 
 
-wbThickness = [0.02, 0.03, 0.02, 0.03]  # order: aft, bot, front, top
+wbThickness = [0.01, 0.01, 0.01, 0.01]  # order: aft, bot, front, top
 
 # 0 type is L, 1 is Hat
 strArea = [0.0005, 0.0005]
@@ -42,7 +42,7 @@ topStringers = [16, 18, 16, 16]
 botType = [1, 1, 1]
 botStringers = [13, 9, 6]
 
-rib_pitch = 1  # space between ribs in meters
+rib_pitch = 0.35  # space between ribs in meters (range of 0.2-1)
 ribs = np.linspace(0, 28, int(28/rib_pitch + 1))
 
 velocity = 250
@@ -70,7 +70,7 @@ end = time.time()
 print(f"Time to load Forces: {end-start}s")
 
 start = time.time()
-wb = Wingbox(forces=testForces, stringer=strng, sweep=27, ribs=ribs)
+wb = Wingbox(forces=testForces, stringer=strng, sweep=27, ribs=ribs, rib_pitch=rib_pitch)
 end = time.time()
 print(f"Time to load Wingbox: {end-start}s")
 
@@ -93,11 +93,11 @@ plotter(testForces.span, failuremode.marginCrack, 'Span [m]', 'MoS Crack', logar
 # plotter(testForces.span, testForces.lift, 'Span', 'Lift per span [N/m]')
 # plotter(testForces.span, testForces.verticalForce, 'Span [m]', 'Vertical force per span [N/m]')
 # plotter(testForces.span, testForces.shearFunction, 'Span [m]', 'Shear Diagram [N]')
-#
+
 # plotter(testForces.span, wb.momentInertiaX, 'Span [m]', 'Moment of Inertia [m^4]')
 # plotter(testForces.span, testForces.bendingFunction, 'Span [m]', 'Bending Moment [N*m]')
 plotter(testForces.span, wb.bendingDisplacement, 'Span [m]', 'Horizontal Displacement [m]', upperlimit=4.2)
-#
+
 # plotter(testForces.span, wb.torsionalStiffness, 'Span [m]', 'Torsional Stiffness [m^4]')
 # plotter(testForces.span, testForces.twistFunction, 'Span [m]', 'Torque [N*m]')
 plotter(testForces.span, wb.twistDisplacement, 'Span [m]', 'Twist Displacement [deg]', upperlimit=10)

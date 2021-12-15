@@ -25,6 +25,7 @@ class Failure:
         # output result for stress at all stringers at the root
         out = constbending * yDistance
         # print(f"the stresses for stringers {out}")
+        # print(f"stressbending{out}")
         return out
 
     def testStress(self, x):
@@ -56,7 +57,7 @@ class Failure:
         # Create boolean array based on stress type (compression = 1, tensile =0)
         cforceboolean = np.where(self.stressBending(x) > 0, np.inf, 1)
         out = cforceboolean * (math.pi ** 2 * K * E * self.Stringer.strIxx) / \
-              (self.Stringer.totalStr ** 2 * self.Stringer.areaArr)
+              ((self.Wingbox.rib_pitch ** 2 * self.Stringer.areaArr))
         return out
 
     def zero_runs(a):
@@ -120,8 +121,9 @@ class Failure:
 
     def webBuckling(self):
         b = self.b()
-        aft, front = [math.pi ** 2 * k_s * E * (self.tAft / b[0]) ** 2 / 12 / (1 - v ** 2),
-                      math.pi ** 2 * k_s * E * (self.tFront / b[1]) ** 2 / 12 / (1 - v ** 2)]
+        # print(f"b{b}")
+        aft, front = [math.pi ** 2 * k_s(self.ab(self.Forces.span)[0]) * E * (self.tAft / b[0]) ** 2 / 12 / (1 - v ** 2),
+                      math.pi ** 2 * k_s(self.ab(self.Forces.span)[0]) * E * (self.tFront / b[1]) ** 2 / 12 / (1 - v ** 2)]
 
         if aft[0] > front[0]:
             # print(f"aft{aft}")
@@ -153,7 +155,7 @@ class Failure:
 
     def marginSkin(self, x):
         index = self.indexCritical(x)
-        print(f"the index of critical stringer in compression is {index}")
+        # print(f"the index of critical stringer in compression is {index}")
         ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
         stress = abs(-self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation)
         critical_stress = self.skinBuckling(x)[0]
@@ -163,25 +165,32 @@ class Failure:
 
     def marginCrack(self, x):
         index = self.indexCriticalTens(x)
-        print(f"the index of critical stringer in tension is {index}")
+        # print(f"the index of critical stringer in tension is {index}")
         ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
         stress = self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation
         return self.crackStress() / abs(stress)
 
     def indexCritical(self, x):
         out = - self.stressBending(x) / self.columnBuckling(x)  # it is dividing be zero sometimes, please fix that
+        for i in self.Stringer.cornerIndex:
+            out[i] = 0
         critical_point = np.where(out > 0, out, -np.inf).argmax()
+        # print(f"criticalpoint{critical_point}")
         return critical_point
 
     def indexCriticalTens(self, x):
-        out = - self.stressBending(x) / self.columnBuckling(x)  # it is dividing be zero sometimes, please fix that
+        out = - self.stressBending(x)  # it is dividing be zero sometimes, please fix that
+        # print(out)
+        for i in self.Stringer.cornerIndex:
+            out[i] = 0
+        # print(out)
         critical_point = np.where(out < 0, out, np.inf).argmin()
         return critical_point
 
     # return the margin due to bending stress of the critical stringer
     def marginStringer(self, x):
         index = self.indexCritical(x)
-        print(f"the index of critical stringer is {index}")
+        # print(f"the index of critical stringer is {index}")
         ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
         stress = -self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation
         critical_stress = - self.columnBuckling(x)[index]

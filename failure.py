@@ -16,8 +16,8 @@ class Failure:
     # Stringer buckling at the root (root has the critical stress due to bending)
     def stressBending(self, x):
         # calculate the stress due to torsion without y location at the root
-        constbending = -self.Forces.bendingMoment(x)[0] / self.Wingbox.momentInertiaX(x)[0]
-
+        constbending = -self.Forces.bendingMoment(x)[0]/ self.Wingbox.momentInertiaX(x)[0]
+        #print(f'const bending{-self.Forces.bendingMoment(x)/ self.Wingbox.momentInertiaX(x)}')
         # get the y location of the stringers w.r.t the neutral axis and convert it to [m]
         yCentroid, stringerY = self.Wingbox.strYDistance(x)
         yDistance = (stringerY[0] - yCentroid[0]) * self.Forces.chord(x)[0]

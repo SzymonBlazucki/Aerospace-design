@@ -42,13 +42,13 @@ topStringers = [16, 18, 16, 16]
 botType = [1, 1, 1]
 botStringers = [13, 9, 6]
 
-rib_pitch = np.array([0.3, 0.5, 1, 5])   # space between ribs in meters (range of 0.2-1)
+rib_pitch = np.array([0.3, 0.5, 0.75, 2])   # space between ribs in meters (range of 0.2-1)
 # ribs = np.linspace(0, 28, int(28/rib_pitch + 1))
-rib_length = np.array([5, 10, 20, 28])
+rib_length = np.array([5, 13, 20, 27.9])
 
-# ribs = np.concatenate((np.array(range(0, rib_length[0], rib_pitch[0])), np.array(range(rib_length[0], rib_length[1], rib_pitch[1])),
-#                        np.array(range(rib_length[1], rib_length[2], rib_pitch[2])), np.array(range(rib_length[2], rib_length[3], rib_pitch[3])) ))
-# print(ribs)
+#ribs = np.concatenate((np.arrange(0, rib_length[0], rib_pitch[0]), np.arrange(rib_length[0], rib_length[1], rib_pitch[1]),
+#                       np.arrange(rib_length[1], rib_length[2], rib_pitch[2]), np.arrange(rib_length[2], rib_length[3], rib_pitch[3]) ))
+#print(ribs)
 ribs = [0,28]
 
 velocity = 250

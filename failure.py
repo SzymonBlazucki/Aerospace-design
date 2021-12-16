@@ -114,8 +114,8 @@ class Failure:
 
     def skinBuckling(self, x):
         # allStress = math.pi ** 2 * k_c * E * self.tb(x) ** 2 / (12 * (1 - v ** 2))  # check that
-        top = math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[
-            1] ** 2  # math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[0] ** 2, \
+        top = math.pi ** 2 * k_c(self.ab(x)[0]) * E / 12 / (1 - v ** 2) * self.tb(x)[1] ** 2
+        # math.pi ** 2 * k_c * E / 12 / (1 - v ** 2) * self.tb(x)[0] ** 2, \
 
         return top, self.tTop
 
@@ -153,12 +153,13 @@ class Failure:
         # print(f"marginweb{margin}")
         return margin
 
-    def marginSkin(self, x):
-        index = self.indexCritical(x)
+    def marginSkin(self, x, rib_pitch):
+        index = self.indexCritical(x, rib_pitch)
         # print(f"the index of critical stringer in compression is {index}")
         ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
         stress = abs(-self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation)
         critical_stress = self.skinBuckling(x)[0]
+        print(len(stress))
         return critical_stress / stress
         # return 1 - self.stressBending(x)[0] / self.skinBuckling(x)[0]  # for skin buckling I always want top, fix skin
         # buckling and stress bending - I want stress at every point not only at the root

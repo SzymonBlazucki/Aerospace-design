@@ -103,7 +103,7 @@ class Failure:
         outBn = np.array(list(map(lambda i: np.amax(np.append(np.diff(np.where(i == 1)[0].reshape(-1, 2)), [1])),
                                   ones)))
         return self.tBot / (0.45 * self.Forces.chord(outB) * outBn / len(stringersArr[0])), self.tTop / (
-                    0.45 * self.Forces.chord(outB) * outBn / len(stringersArr[0]))
+                    0.45 * self.Forces.chord(outB) * outBn / len(stringersArr[0])) # REPAIR BOTTOM!!!
 
     def b(self):
         rib = self.Wingbox.ribs
@@ -170,8 +170,8 @@ class Failure:
         stress = self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation
         return self.crackStress() / abs(stress)
 
-    def indexCritical(self, x):
-        out = - self.stressBending(x) / self.columnBuckling(x)  # it is dividing be zero sometimes, please fix that
+    def indexCritical(self, x, rib_pitch):
+        out = - self.stressBending(x) / self.columnBuckling(x, rib_pitch)  # it is dividing be zero sometimes, please fix that
         for i in self.Stringer.cornerIndex:
             out[i] = 0
         critical_point = np.where(out > 0, out, -np.inf).argmax()

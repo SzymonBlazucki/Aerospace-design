@@ -5,7 +5,7 @@ from constants import interp, E, G, factor
 
 
 class Wingbox:
-    def __init__(self, forces, sweep, stringer, ribs, rib_pitch):
+    def __init__(self, forces, sweep, stringer, ribs, rib_length, rib_pitch):
         self.Forces = forces
         self.sweep = sweep
         self.t = stringer.thickness
@@ -16,6 +16,7 @@ class Wingbox:
         self.Stringer = stringer
         self.ribs = ribs
         self.rib_pitch = rib_pitch
+        self.rib_length = rib_length
     # Thickness of wingbox sides in clockwise direction starting from trailing edge
 
     def enclosedArea(self, x):

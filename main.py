@@ -42,8 +42,14 @@ topStringers = [16, 18, 16, 16]
 botType = [1, 1, 1]
 botStringers = [13, 9, 6]
 
-rib_pitch = 0.35  # space between ribs in meters (range of 0.2-1)
-ribs = np.linspace(0, 28, int(28/rib_pitch + 1))
+rib_pitch = np.array([0.3, 0.5, 1, 5])   # space between ribs in meters (range of 0.2-1)
+# ribs = np.linspace(0, 28, int(28/rib_pitch + 1))
+rib_length = np.array([5, 10, 20, 28])
+
+# ribs = np.concatenate((np.array(range(0, rib_length[0], rib_pitch[0])), np.array(range(rib_length[0], rib_length[1], rib_pitch[1])),
+#                        np.array(range(rib_length[1], rib_length[2], rib_pitch[2])), np.array(range(rib_length[2], rib_length[3], rib_pitch[3])) ))
+# print(ribs)
+ribs = [0,28]
 
 velocity = 250
 angle = 10
@@ -65,7 +71,7 @@ testForces = Forces([zeroAngleFirstTable, tenAngleFirstTable],
                     freeVel=velocity, bHalf=28,
                     AoA=math.asin((cld - zeroCl) / (tenCl - zeroCl) * math.sin(math.radians(10))), xCentroid=0.3755,
                     # might've changed
-                    engine=eng, spanSteps=101, stringer=strng, density=2700) # FOr final results keep steps high
+                    engine=eng, spanSteps=51, stringer=strng, density=2700) # For final results keep steps high
 end = time.time()
 print(f"Time to load Forces: {end-start}s")
 

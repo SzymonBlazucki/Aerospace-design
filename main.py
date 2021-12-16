@@ -36,8 +36,8 @@ wbThickness = [0.01, 0.01, 0.01, 0.01]  # order: aft, bot, front, top
 strArea = [0.0005, 0.0005]
 strIxx = [4.18E-7, 4.18E-7]
 
-topType = [1, 1, 1, 1]
-topStringers = [16, 18, 16, 16]
+topType = [1, 1, 1, 1, 1]
+topStringers = [16, 18, 16, 16, 28]
 
 botType = [1, 1, 1]
 botStringers = [13, 9, 6]
@@ -93,10 +93,21 @@ def span(a, b):
 
     return testForces.span[a:b]
 
+rib_length = np.concatenate((np.array([0]), rib_length))
+marginStringer = np.array([])
+for i in range(len(rib_pitch)):
+    # if i == 0:
+    #     marginsStringer = failuremode.marginStringer(span(rib_length[i], rib_length[i + 1]), rib_pitch[i])
+    # else
+    marginStringer = np.concatenate((marginStringer, failuremode.marginStringer(span(rib_length[i], rib_length[i+1]), rib_pitch[i])))
+    # print(rib_length[i], rib_length[i+1], rib_pitch[i])
+    # print(failuremode.marginStringer(span(rib_length[i], rib_length[i+1]), rib_pitch[i]))
 
+plt.plot(testForces.span[:-1], marginStringer)
+plt.show()
 
-print(failuremode.marginStringer(span(0, 5), rib_pitch[0]))
-
+print(failuremode.stressBending(testForces.span[testForces.span > 20]))
+print(failuremode.marginStringer(span(20, 27.9), 2))
 
 
 # plotter(testForces.span, failuremode.marginStringer, 'Span [m]', 'MoS Stringer', logarithmic=True, lowerlimit=1)

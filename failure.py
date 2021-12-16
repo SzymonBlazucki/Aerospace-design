@@ -172,10 +172,13 @@ class Failure:
 
     def indexCritical(self, x, rib_pitch):
         out = - self.stressBending(x) / self.columnBuckling(x, rib_pitch)  # it is dividing be zero sometimes, please fix that
+        print(f"bending{self.stressBending(x)}")
+        print(f"colum{self.columnBuckling(x, rib_pitch)}")
         for i in self.Stringer.cornerIndex:
             out[i] = 0
+        print(f"out{out}")
         critical_point = np.where(out > 0, out, -np.inf).argmax()
-        # print(f"criticalpoint{critical_point}")
+        print(f"criticalpoint{critical_point}")
         return critical_point
 
     def indexCriticalTens(self, x):
@@ -191,8 +194,13 @@ class Failure:
     def marginStringer(self, x, rib_pitch):
         index = self.indexCritical(x, rib_pitch)
         # print(f"the index of critical stringer is {index}")
-        ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
+        yCentroid, stringerY = self.Wingbox.strYDistance(x)
+        yDistance = (stringerY[0] - yCentroid[0]) * self.Forces.chord(x)[0]
+        ylocation = abs(yDistance[index])
+
         stress = -self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation
+        # print(f"ylocation{ylocation}")
+        #print(f'moment{self.Wingbox.momentInertiaX(x)}')
         critical_stress = - self.columnBuckling(x, rib_pitch)[index]
         # critical_stress = - self.rankineGordon(x)[index]
 

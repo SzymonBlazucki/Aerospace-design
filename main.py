@@ -76,7 +76,7 @@ end = time.time()
 print(f"Time to load Forces: {end-start}s")
 
 start = time.time()
-wb = Wingbox(forces=testForces, stringer=strng, sweep=27, ribs=ribs, rib_pitch=rib_pitch)
+wb = Wingbox(forces=testForces, stringer=strng, sweep=27, ribs= ribs, rib_length=rib_length, rib_pitch=rib_pitch)
 end = time.time()
 print(f"Time to load Wingbox: {end-start}s")
 
@@ -87,11 +87,22 @@ print(f"Time to load Failure: {end-start}s")
 
 start = time.time()
 
+def span(a, b):
+    size = len(testForces.span)
+    a, b = math.floor(a * size / 28), math.floor(b * size / 28)
 
-plotter(testForces.span, failuremode.marginStringer, 'Span [m]', 'MoS Stringer', logarithmic=True, lowerlimit=1)
-plotter(testForces.span, failuremode.marginWeb, 'Span [m]', 'MoS Web', logarithmic=True, lowerlimit=1)
-plotter(testForces.span, failuremode.marginSkin, 'Span [m]', 'MoS Skin', logarithmic=True, lowerlimit=1)
-plotter(testForces.span, failuremode.marginCrack, 'Span [m]', 'MoS Crack', logarithmic=True, lowerlimit=1)
+    return testForces.span[a:b]
+
+
+
+print(failuremode.marginStringer(span(0, 5), rib_pitch[0]))
+
+
+
+# plotter(testForces.span, failuremode.marginStringer, 'Span [m]', 'MoS Stringer', logarithmic=True, lowerlimit=1)
+# plotter(testForces.span, failuremode.marginWeb, 'Span [m]', 'MoS Web', logarithmic=True, lowerlimit=1)
+# plotter(testForces.span, failuremode.marginSkin, 'Span [m]', 'MoS Skin', logarithmic=True, lowerlimit=1)
+# plotter(testForces.span, failuremode.marginCrack, 'Span [m]', 'MoS Crack', logarithmic=True, lowerlimit=1)
 
 # plotter(testForces.span, testForces.chord, 'Span [m]', 'Chord [m]')
 # plotter(testForces.span, testForces.weight, 'Span [m]', 'Weight per span [N/m]')
@@ -102,11 +113,11 @@ plotter(testForces.span, failuremode.marginCrack, 'Span [m]', 'MoS Crack', logar
 
 # plotter(testForces.span, wb.momentInertiaX, 'Span [m]', 'Moment of Inertia [m^4]')
 # plotter(testForces.span, testForces.bendingFunction, 'Span [m]', 'Bending Moment [N*m]')
-plotter(testForces.span, wb.bendingDisplacement, 'Span [m]', 'Horizontal Displacement [m]', upperlimit=4.2)
+# plotter(testForces.span, wb.bendingDisplacement, 'Span [m]', 'Horizontal Displacement [m]', upperlimit=4.2)
 
 # plotter(testForces.span, wb.torsionalStiffness, 'Span [m]', 'Torsional Stiffness [m^4]')
 # plotter(testForces.span, testForces.twistFunction, 'Span [m]', 'Torque [N*m]')
-plotter(testForces.span, wb.twistDisplacement, 'Span [m]', 'Twist Displacement [deg]', upperlimit=10)
+# plotter(testForces.span, wb.twistDisplacement, 'Span [m]', 'Twist Displacement [deg]', upperlimit=10)
 
 
 end = time.time()

@@ -53,11 +53,11 @@ class Failure:
         return self.Forces.bendingFunction(x) * y / self.Wingbox.momentInertiaX(x)
 
     # return the critical column buckling stress based on inputs
-    def columnBuckling(self, x):
+    def columnBuckling(self, x, rib_pitch):
         # Create boolean array based on stress type (compression = 1, tensile =0)
         cforceboolean = np.where(self.stressBending(x) > 0, np.inf, 1)
         out = cforceboolean * (math.pi ** 2 * K * E * self.Stringer.strIxx) / \
-              ((self.Wingbox.rib_pitch ** 2 * self.Stringer.areaArr))
+              ((rib_pitch ** 2 * self.Stringer.areaArr))
         return out
 
     def zero_runs(a):
@@ -188,12 +188,12 @@ class Failure:
         return critical_point
 
     # return the margin due to bending stress of the critical stringer
-    def marginStringer(self, x):
-        index = self.indexCritical(x)
+    def marginStringer(self, x, rib_pitch):
+        index = self.indexCritical(x, rib_pitch)
         # print(f"the index of critical stringer is {index}")
         ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
         stress = -self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation
-        critical_stress = - self.columnBuckling(x)[index]
+        critical_stress = - self.columnBuckling(x, rib_pitch)[index]
         # critical_stress = - self.rankineGordon(x)[index]
 
         margin = critical_stress / stress

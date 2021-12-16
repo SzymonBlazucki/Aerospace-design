@@ -12,6 +12,7 @@ prog_start = time.time()
 
 def plotter(x, y, xLabel, yLabel, logarithmic=False, lowerlimit=None, upperlimit=None):
 
+
     plt.plot(x, y(x), label=yLabel)
 
     if logarithmic:
@@ -29,6 +30,24 @@ def plotter(x, y, xLabel, yLabel, logarithmic=False, lowerlimit=None, upperlimit
     plt.grid(True)
     plt.show()
 
+def plotter2(x, y, xLabel, yLabel, logarithmic=False, lowerlimit=None, upperlimit=None, rib_pitch=None):
+
+    plt.plot(x, y, label=yLabel)
+
+    if logarithmic:
+        plt.yscale("log")
+    if lowerlimit:
+        plt.hlines(y=lowerlimit, xmin=0, xmax=28, label='Lower limit', color='r')
+        plt.legend()
+    if upperlimit:
+        plt.hlines(y=upperlimit, xmin=0, xmax=28, label='Upper limit', color='m')
+        plt.legend()
+
+    plt.title(xLabel + ' vs ' + yLabel)
+    plt.xlabel(xLabel)
+    plt.ylabel(yLabel)
+    plt.grid(True)
+    plt.show()
 
 wbThickness = [0.01, 0.01, 0.01, 0.02]  # order: aft, bot, front, top
 
@@ -44,7 +63,7 @@ botStringers = [13, 9, 6]
 
 rib_pitch = np.array([0.3, 0.5, 0.75, 1])   # space between ribs in meters (range of 0.2-1)
 # ribs = np.linspace(0, 28, int(28/rib_pitch + 1))
-rib_length = np.array([5, 13, 20, 27.9])
+rib_length = np.array([5, 13, 20, 28])
 
 ribs = np.concatenate((np.arange(0, rib_length[0], rib_pitch[0]), np.arange(rib_length[0], rib_length[1], rib_pitch[1]),
                        np.arange(rib_length[1], rib_length[2], rib_pitch[2]), np.arange(rib_length[2], rib_length[3], rib_pitch[3]), np.array([28]) ))
@@ -118,10 +137,10 @@ for i in range(len(rib_pitch)):
 # plt.show()
 
 
-# plotter(testForces.span, failuremode.marginStringer, 'Span [m]', 'MoS Stringer', logarithmic=True, lowerlimit=1)
-# plotter(testForces.span, failuremode.marginWeb, 'Span [m]', 'MoS Web', logarithmic=True, lowerlimit=1)
-# plotter(testForces.span, failuremode.marginSkin, 'Span [m]', 'MoS Skin', logarithmic=True, lowerlimit=1)
-# plotter(testForces.span, failuremode.marginCrack, 'Span [m]', 'MoS Crack', logarithmic=True, lowerlimit=1)
+plotter2(testForces.span, marginStringer, 'Span [m]', 'MoS Stringer', logarithmic=True, lowerlimit=1, rib_pitch=rib_pitch)
+plotter(testForces.span, failuremode.marginWeb, 'Span [m]', 'MoS Web', logarithmic=True, lowerlimit=1)
+plotter2(testForces.span, marginSkin, 'Span [m]', 'MoS Skin', logarithmic=True, lowerlimit=1, rib_pitch=rib_pitch)
+plotter(testForces.span, failuremode.marginCrack, 'Span [m]', 'MoS Crack', logarithmic=True, lowerlimit=1)
 
 # plotter(testForces.span, testForces.chord, 'Span [m]', 'Chord [m]')
 # plotter(testForces.span, testForces.weight, 'Span [m]', 'Weight per span [N/m]')
@@ -132,11 +151,11 @@ for i in range(len(rib_pitch)):
 
 # plotter(testForces.span, wb.momentInertiaX, 'Span [m]', 'Moment of Inertia [m^4]')
 # plotter(testForces.span, testForces.bendingFunction, 'Span [m]', 'Bending Moment [N*m]')
-# plotter(testForces.span, wb.bendingDisplacement, 'Span [m]', 'Horizontal Displacement [m]', upperlimit=4.2)
+plotter(testForces.span, wb.bendingDisplacement, 'Span [m]', 'Horizontal Displacement [m]', upperlimit=4.2)
 
 # plotter(testForces.span, wb.torsionalStiffness, 'Span [m]', 'Torsional Stiffness [m^4]')
 # plotter(testForces.span, testForces.twistFunction, 'Span [m]', 'Torque [N*m]')
-# plotter(testForces.span, wb.twistDisplacement, 'Span [m]', 'Twist Displacement [deg]', upperlimit=10)
+plotter(testForces.span, wb.twistDisplacement, 'Span [m]', 'Twist Displacement [deg]', upperlimit=10)
 
 
 end = time.time()

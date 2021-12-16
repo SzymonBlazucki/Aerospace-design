@@ -156,7 +156,10 @@ class Failure:
     def marginSkin(self, x, rib_pitch):
         index = self.indexCritical(x, rib_pitch)
         # print(f"the index of critical stringer in compression is {index}")
-        ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
+        yCentroid, stringerY = self.Wingbox.strYDistance(x)
+        yDistance = (stringerY[0] - yCentroid[0])
+        ylocation = yDistance[index] * self.Forces.chord(x)
+
         stress = abs(-self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation)
         critical_stress = self.skinBuckling(x)[0]
         print(len(stress))
@@ -167,19 +170,22 @@ class Failure:
     def marginCrack(self, x):
         index = self.indexCriticalTens(x)
         # print(f"the index of critical stringer in tension is {index}")
-        ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
+        yCentroid, stringerY = self.Wingbox.strYDistance(x)
+        yDistance = (stringerY[0] - yCentroid[0])
+        ylocation = yDistance[index] * self.Forces.chord(x)
+        # ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
         stress = self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation
         return self.crackStress() / abs(stress)
 
     def indexCritical(self, x, rib_pitch):
         out = - self.stressBending(x) / self.columnBuckling(x, rib_pitch)  # it is dividing be zero sometimes, please fix that
-        print(f"bending{self.stressBending(x)}")
-        print(f"colum{self.columnBuckling(x, rib_pitch)}")
+        # print(f"bending{self.stressBending(x)}")
+        # print(f"colum{self.columnBuckling(x, rib_pitch)}")
         for i in self.Stringer.cornerIndex:
             out[i] = 0
-        print(f"out{out}")
+        # print(f"out{out}")
         critical_point = np.where(out > 0, out, -np.inf).argmax()
-        print(f"criticalpoint{critical_point}")
+        # print(f"criticalpoint{critical_point}")
         return critical_point
 
     def indexCriticalTens(self, x):

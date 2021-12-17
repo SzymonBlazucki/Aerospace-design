@@ -39,7 +39,7 @@ class Stringer:
         return (out > 0) * 1
 
     def topYPos(self):  # y-position of stringers in top
-        return 0.016222222222 * self.topXPos + 0.0653 * factor
+        return 0.016222222222 * 0 * self.topXPos + 0.0653 * factor
 
     def botYPos(self):  # y-position of stringers in bot
         return 0.014222222222 * self.botXPos

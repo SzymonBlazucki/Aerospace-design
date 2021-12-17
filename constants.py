@@ -3,7 +3,7 @@ from scipy import interpolate
 
 g = 9.80665  # [m/s^2] gravity acceleration
 cld = 0.6767
-a = 0.005
+a = 0.005/2
 
 factor = 1.75  # try to keep below 1.75 or 2
 K = 1  # constant for column buckling

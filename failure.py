@@ -31,6 +31,9 @@ class Failure:
     def testStress(self, x):
         index = self.indexCritical(x)
         # print(f"the index of critical stringer is {index}")
+        yCentroid, stringerY = self.Wingbox.strYDistance(x)
+        ylocation = stringerY[0] - yCentroid[0]
+        # print(f"ylocation{ylocation}")
         ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
         stress = abs(-self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation)
         return stress
@@ -162,7 +165,7 @@ class Failure:
 
         stress = abs(-self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation)
         critical_stress = self.skinBuckling(x)[0]
-        print(len(stress))
+        # print(len(stress))
         return critical_stress / stress
         # return 1 - self.stressBending(x)[0] / self.skinBuckling(x)[0]  # for skin buckling I always want top, fix skin
         # buckling and stress bending - I want stress at every point not only at the root
@@ -171,8 +174,10 @@ class Failure:
         index = self.indexCriticalTens(x)
         # print(f"the index of critical stringer in tension is {index}")
         yCentroid, stringerY = self.Wingbox.strYDistance(x)
-        yDistance = (stringerY[0] - yCentroid[0])
-        ylocation = yDistance[index] * self.Forces.chord(x)
+
+        yDistance = (stringerY[:, index] - yCentroid[:, index])
+
+        ylocation = yDistance * self.Forces.chord(x)
         # ylocation = self.Stringer.YPos()[index] * self.Forces.chord(x)
         stress = self.Forces.bendingMoment(x) / self.Wingbox.momentInertiaX(x) * ylocation
         return self.crackStress() / abs(stress)

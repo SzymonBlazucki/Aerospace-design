@@ -41,15 +41,15 @@ class Wingbox:
                (0.0662 * self.t1 * self.Forces.chord(x) + 0.45 * self.t2 * self.Forces.chord(x) +
                 0.0653 * self.t3 * self.Forces.chord(x) + 0.45 * self.t4 * self.Forces.chord(x) +
                 self.Stringer.areaTot(x))
-
         return (yBar - 0.0154) * factor
 
     def strYDistance(self, x):
         # Get the y locations of the stringer
         stringerY = self.Stringer.activeStringers(self.Stringer.totalStr, x) * self.Stringer.YPos()
-
+        # print(f"YPOS{self.Stringer.YPos()}")
         rows, cols = stringerY.shape
         yCentroid = np.tile(np.array([self.yBarWingbox(x)]).transpose(), (1, cols))
+
         return (yCentroid, stringerY)
 
     def steinerTerm(self, x):

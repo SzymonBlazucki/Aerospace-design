@@ -49,31 +49,26 @@ def plotter2(x, y, xLabel, yLabel, logarithmic=False, lowerlimit=None, upperlimi
     plt.grid(True)
     plt.show()
 
-wbThickness = [0.01, 0.01, 0.01, 0.02]  # order: aft, bot, front, top
+wbThickness = [0.02, 0.03, 0.02, 0.02]  # order: aft, bot, front, top
 
 # 0 type is L, 1 is Hat
-strArea = [0.0005, 0.0005]
+strArea = [0.0005, 0.001]
 strIxx = [4.18E-7, 4.18E-7]
 
-topType = [1, 1, 1, 1, 1]
-topStringers = [16, 18, 16, 16, 28]
+topType = [1] * 20
+topStringers = [20] * 20
 
-botType = [1, 1, 1]
-botStringers = [13, 9, 6]
+botType = [1, 1, 1, 1, 1]
+botStringers = [18, 8, 3, 3, 3]
 
-rib_pitch = np.array([0.3, 0.5, 0.75, 1])   # space between ribs in meters (range of 0.2-1)
-# ribs = np.linspace(0, 28, int(28/rib_pitch + 1))
-rib_length = np.array([5, 13, 20, 28])
-
-ribs = np.concatenate((np.arange(0, rib_length[0], rib_pitch[0]), np.arange(rib_length[0], rib_length[1], rib_pitch[1]),
-                       np.arange(rib_length[1], rib_length[2], rib_pitch[2]), np.arange(rib_length[2], rib_length[3], rib_pitch[3]), np.array([28]) ))
-#print(len(ribs))
-#print('here')
-#ribs = [0,28]
+rib_pitch = np.array([0.1, 0.4, 0.5, 0.5])   # space between ribs in meters (range of 0.2-1)
+rib_length = np.array([6, 12, 20, 28])  # Ending location of the ribs in span direction
 
 velocity = 250
 angle = 10
 
+ribs = np.concatenate((np.arange(0, rib_length[0], rib_pitch[0]), np.arange(rib_length[0], rib_length[1], rib_pitch[1]),
+                       np.arange(rib_length[1], rib_length[2], rib_pitch[2]), np.arange(rib_length[2], rib_length[3], rib_pitch[3]), np.array([28]) ))
 
 start = time.time()
 eng = Engine()
@@ -117,24 +112,12 @@ rib_length = np.concatenate((np.array([0]), rib_length))
 marginStringer = np.array([])
 marginSkin = np.array([])
 for i in range(len(rib_pitch)):
-    # if i == 0:
-    #     marginsStringer = failuremode.marginStringer(span(rib_length[i], rib_length[i + 1]), rib_pitch[i])
-    # else
     marginStringer = np.concatenate((marginStringer, failuremode.marginStringer(span(rib_length[i], rib_length[i+1]), rib_pitch[i])))
-    # print(rib_length[i], rib_length[i+1], rib_pitch[i])
-    # print(failuremode.marginStringer(span(rib_length[i], rib_length[i+1]), rib_pitch[i]))
+
 for i in range(len(rib_pitch)):
-    # if i == 0:
-    #     marginsStringer = failuremode.marginStringer(span(rib_length[i], rib_length[i + 1]), rib_pitch[i])
-    # else
     marginSkin = np.concatenate((marginSkin, failuremode.marginSkin(span(rib_length[i], rib_length[i+1]), rib_pitch[i])))
 
 
-# plt.plot(testForces.span, marginStringer)
-# plt.show()
-
-# plt.plot(testForces.span, marginSkin)
-# plt.show()
 
 
 plotter2(testForces.span, marginStringer, 'Span [m]', 'MoS Stringer', logarithmic=True, lowerlimit=1, rib_pitch=rib_pitch)
